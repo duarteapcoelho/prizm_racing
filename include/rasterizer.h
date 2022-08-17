@@ -41,8 +41,7 @@ namespace Rasterizer {
 	vec3d toDevice(vec3d p);
 	vec3i toScreen(vec3d p);
 	void drawLine(vec3d p0, vec3d p1);
-	void drawTriangle(Triangle triangle, Shader shader);
-	void drawTriangleOutline(Triangle triangle, Shader shader);
-	void drawModel(Model model);
+	void drawTriangle(Triangle triangle, Shader shader, bool useDepth);
+	void drawModel(Model model, bool useDepth);
 
 };

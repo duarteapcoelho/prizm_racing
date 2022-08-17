@@ -46,6 +46,8 @@ namespace Rasterizer {
 	}
 
 	vec3d toDevice(vec3d p){
+		if(p.z == 0)
+			p.z = -0.1;
 		return {
 			p.x / p.z,
 			p.y / p.z,
@@ -61,7 +63,7 @@ namespace Rasterizer {
 		};
 	}
 
-	void drawTriangle(Triangle triangle, Shader shader){
+	void drawTriangle(Triangle triangle, Shader shader, bool useDepth){
 		// reset();
 		// SDL_SetRenderDrawColor(renderer, triangle.c.r, triangle.c.g, triangle.c.b, 255);
 		//
@@ -70,7 +72,7 @@ namespace Rasterizer {
 		triangle.p1 = shader.vertexShader(triangle.p1, shader.uniforms);
 		triangle.p2 = shader.vertexShader(triangle.p2, shader.uniforms);
 
-		if(triangle.p0.z == 0 || triangle.p1.z == 0 || triangle.p2.z == 0)
+		if(useDepth && (triangle.p0.z == 0 || triangle.p1.z == 0 || triangle.p2.z == 0))
 			return;
 
 		vec3d p0_d = toDevice(triangle.p0);
@@ -147,12 +149,17 @@ namespace Rasterizer {
 
 			for(int x = minX; x < maxX; x++){
 				if(ie1 >= 0 && ie2 >= 0 && ie3 >= 0) {
-					vec3d b = {i_bary_u, i_bary_v, i_bary_w};
-					// fp i_z = (b.x * i_p0z + b.y * i_p1z + b.z * i_p2z);
+					bool visible = true;
 					fp i_z;
-					i_z.i = ((b.x.i * i_p0z.i) + (b.y.i * i_p1z.i) + (b.z.i * i_p2z.i)) / FP_RIGHT;
-					if(i_z > depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1){
-						depthBuffer[x+y*RENDER_WIDTH] = i_z;
+					if(useDepth){
+						vec3d b = {i_bary_u, i_bary_v, i_bary_w};
+						// fp i_z = (b.x * i_p0z + b.y * i_p1z + b.z * i_p2z);
+						i_z.i = ((b.x.i * i_p0z.i) + (b.y.i * i_p1z.i) + (b.z.i * i_p2z.i)) / FP_RIGHT;
+						visible = visible && (i_z > depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1);
+					}
+					if(visible){
+						if(useDepth)
+							depthBuffer[x+y*RENDER_WIDTH] = i_z;
 						Color c = shader.fragmentShader(triangle.c, shader.uniforms);
 #if PIXEL_SIZE == 1
 						Display::drawPoint(x, y, c);
@@ -168,24 +175,28 @@ namespace Rasterizer {
 				ie2 += (p1.y - p2.y);
 				ie3 += (p2.y - p0.y);
 
-				i_bary_v = i_bary_v + bary_v_per_x;
-				i_bary_w = i_bary_w + bary_w_per_x;
-				i_bary_u = i_bary_u + bary_u_per_x;
+				if(useDepth){
+					i_bary_v = i_bary_v + bary_v_per_x;
+					i_bary_w = i_bary_w + bary_w_per_x;
+					i_bary_u = i_bary_u + bary_u_per_x;
+				}
 			}
 			e1 -= (p0.x - p1.x);
 			e2 -= (p1.x - p2.x);
 			e3 -= (p2.x - p0.x);
 
-			bary_v = bary_v + bary_v_per_y;
-			bary_w = bary_w + bary_w_per_y;
-			bary_u = bary_u + bary_u_per_y;
+			if(useDepth){
+				bary_v = bary_v + bary_v_per_y;
+				bary_w = bary_w + bary_w_per_y;
+				bary_u = bary_u + bary_u_per_y;
+			}
 
 		}
 	}
 
-	void drawModel(Model model){
+	void drawModel(Model model, bool useDepth){
 		for(int i = 0; i < model.mesh.numTriangles; i++){
-			drawTriangle(model.mesh.triangles[i], model.shader);
+			drawTriangle(model.mesh.triangles[i], model.shader, useDepth);
 		}
 	}
 };

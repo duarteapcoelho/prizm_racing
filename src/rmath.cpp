@@ -82,5 +82,38 @@ fp fp_cos(fp x){
 }
 
 fp fp_atan(fp x){
-	return (fp(PI)/fp(4)) * x - x * (fp_abs(x) - fp(1)) * (fp(0.245) + fp(0.066)*fp_abs(x));
+	return fp(PI)*fp(4) * x - x * (fp_abs(x) - fp(1)) * (fp(0.245) + fp(0.066) * fp_abs(x));
+}
+fp fp_atan2(fp y, fp x){
+	if(x == 0 || y == 0)
+		return 0;
+	if(x >= 0) {
+		if(y >= 0) {
+			if(y < x) {
+				return fp_atan(y / x);
+			} else {
+				return fp(PI)*fp(2) - fp_atan(x / y);
+			}
+		} else {
+			if(fp(0)-y < x){
+				return fp_atan(y / x);
+			} else {
+				return fp(0)-fp(PI)*fp(2) - fp_atan(x / y);
+			}
+		}
+	} else {
+		if(y >= 0){
+			if(y < fp(0)-x){
+				return fp_atan(y / x) + fp(PI);
+			} else {
+				return fp(PI)*fp(2) - fp_atan(x / y);
+			}
+		} else {
+			if(fp(0)-y < fp(0)-x){
+				return fp_atan(y / x) - fp(PI);
+			} else {
+				return fp(0)-fp(PI)*fp(2) - fp_atan(x / y);
+			}
+		}
+	}
 }

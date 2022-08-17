@@ -5,17 +5,21 @@
 #include "input.h"
 #include "mat4.h"
 #include "rmath.h"
+#include "math.h"
 
 #define NUM_CUBES 20
 
 mat4 view;
 vec3d carPos = {0, 0, 0};
 vec3d carSpeed = {0, 0, 0};
+fp carDirection = 0;
 fp carAngle = 0;
 fp cameraAngle = 0;
 fp wheelSpeed = 0;
 
 vec3d vertexShader(vec3d i, void *uniforms){
+	if(uniforms == nullptr)
+		return view * i;
 	mat4 model = *((mat4*)uniforms);
 	return view * model * i;
 }
@@ -718,30 +722,45 @@ int main(){
 		carTriangles
 	};
 
-#define TILE_SIZE 20
-	Triangle floorTriangles[2*TILE_SIZE*TILE_SIZE] = {};
-	for(int x = 0; x < TILE_SIZE; x++){
-		for(int y = 0; y < TILE_SIZE; y++){
-			floorTriangles[x+y*TILE_SIZE] = {
-				{fp(x) / fp(TILE_SIZE) - fp(0.5), 0, fp(y) / fp(TILE_SIZE) - fp(0.5)},
-				{fp(x+1) / fp(TILE_SIZE) - fp(0.5), 0, fp(y) / fp(TILE_SIZE) - fp(0.5)},
-				{fp(x+1) / fp(TILE_SIZE) - fp(0.5), 0, fp(y+1) / fp(TILE_SIZE) - fp(0.5)},
-				newColor(255, 255, 255)
-			};
-			floorTriangles[TILE_SIZE*TILE_SIZE + x+y*TILE_SIZE] = {
-				{fp(x) / fp(TILE_SIZE) - fp(0.5), 0, fp(y) / fp(TILE_SIZE) - fp(0.5)},
-				{fp(x) / fp(TILE_SIZE) - fp(0.5), 0, fp(y+1) / fp(TILE_SIZE) - fp(0.5)},
-				{fp(x+1) / fp(TILE_SIZE) - fp(0.5), 0, fp(y+1) / fp(TILE_SIZE) - fp(0.5)},
-				newColor(0, 0, 0)
-			};
-		}
-	}
-	Mesh floorMesh = {
-		2*TILE_SIZE*TILE_SIZE,
-		floorTriangles
-	};
-
 	srand(0);
+
+	Triangle trackTriangles[100*2];
+
+	for(int i = 0; i < 100; i++){
+		fp angle = fp(i) * fp(2*PI) / fp(100);
+		fp nextAngle = fp(i+1) * fp(2*PI) / fp(100);
+		printf("%.3f\n", (float)fp_sin(angle));
+		trackTriangles[i] = {
+			{fp_cos(angle)*fp(4), 0, fp_sin(angle)*fp(4)},
+			{fp_cos(angle)*fp(5), 0, fp_sin(angle)*fp(5)},
+			{fp_cos(nextAngle)*fp(4), 0, fp_sin(nextAngle)*fp(4)},
+			newColor(0, 0, 0)
+		};
+		trackTriangles[i].p0 = trackTriangles[i].p0 * fp(10);
+		trackTriangles[i].p1 = trackTriangles[i].p1 * fp(10);
+		trackTriangles[i].p2 = trackTriangles[i].p2 * fp(10);
+		trackTriangles[i+100] = {
+			{fp_cos(angle)*fp(5), 0, fp_sin(angle)*fp(5)},
+			{fp_cos(nextAngle)*fp(4), 0, fp_sin(nextAngle)*fp(4)},
+			{fp_cos(nextAngle)*fp(5), 0, fp_sin(nextAngle)*fp(5)},
+			newColor(255, 255, 255)
+		};
+		trackTriangles[i+100].p0 = trackTriangles[i+100].p0 * fp(10);
+		trackTriangles[i+100].p1 = trackTriangles[i+100].p1 * fp(10);
+		trackTriangles[i+100].p2 = trackTriangles[i+100].p2 * fp(10);
+	}
+
+	Model track = {
+		.mesh = {
+			100 * 2,
+			trackTriangles
+		},
+		.shader = {
+			.vertexShader = vertexShader,
+			.fragmentShader = fragmentShader,
+			.uniforms = nullptr
+		}
+	};
 
 	mat4 carMatrix;
 
@@ -751,18 +770,6 @@ int main(){
 			.vertexShader = vertexShader,
 			.fragmentShader = fragmentShader,
 			.uniforms = &carMatrix
-		}
-	};
-
-	mat4 floorMatrix;
-	floorMatrix = mat4::scale(floorMatrix, 50, 1, 50);
-
-	Model floor = {
-		.mesh = floorMesh,
-		.shader = {
-			.vertexShader = vertexShader,
-			.fragmentShader = fragmentShader,
-			.uniforms = &floorMatrix
 		}
 	};
 
@@ -784,23 +791,21 @@ int main(){
 		if(Input::keyDown(KEY_LEFT)){
 			carAngle = carAngle - speed;
 		}
+		wheelSpeed = 0;
 		if(Input::keyDown(KEY_UP)){
-			wheelSpeed = wheelSpeed + acceleration;
+			wheelSpeed = wheelSpeed + fp(2);
 		}
 		if(Input::keyDown(KEY_DOWN)){
-			wheelSpeed = wheelSpeed - acceleration;
+			wheelSpeed = wheelSpeed - fp(2);
 		}
 		// wheelSpeed = wheelSpeed / (fp(1000) * fp(Time::delta));
 		// if(wheelSpeed < 0)
 		// 	wheelSpeed = 0;
-		wheelSpeed = wheelSpeed * fp(0.7);
-		carSpeed.x = carSpeed.x + wheelSpeed * fp(Time::delta) * fp_cos(carAngle) / fp(1000);
-		carSpeed.z = carSpeed.z + wheelSpeed * fp(Time::delta) * fp_sin(fp(0)-carAngle) / fp(1000);
-		if(carSpeed.z == 0)
-			cameraAngle = 0;
-		else
-			cameraAngle = fp(0) - fp_atan(carSpeed.z / carSpeed.x);
-		printf("%.3f %.3f\n", (float)carSpeed.x, (float)carSpeed.z);
+		// wheelSpeed = wheelSpeed * fp(0.7);
+		carSpeed.x = carSpeed.x + wheelSpeed * fp(Time::delta) * fp_cos(carAngle) / fp(500);
+		carSpeed.z = carSpeed.z + wheelSpeed * fp(Time::delta) * fp_sin(fp(0)-(carAngle)) / fp(500);
+		// cameraAngle = fp(0) - fp_atan2(carSpeed.z, carSpeed.x);
+		cameraAngle = carAngle;
 		carPos.x = carPos.x + carSpeed.x * fp(Time::delta);
 		carPos.z = carPos.z + carSpeed.z * fp(Time::delta);
 
@@ -816,8 +821,8 @@ int main(){
 		view = mat4::rotateY(view, fp(0) - cameraAngle - fp(HALF_PI));
 		view = mat4::translate(view, fp(0)-carPos.x, 0, fp(0)-carPos.z);
 
-		Rasterizer::drawModel(car);
-		Rasterizer::drawModel(floor);
+		Rasterizer::drawModel(track, false);
+		Rasterizer::drawModel(car, true);
 
 		char buffer[10];
 #ifdef SDL
