@@ -33,6 +33,7 @@ $(TARGET): $(OBJECTS)
 	$(CC) $^ -o $(TARGET) $(LIB)
 
 build_sdl/%.o: $(SRCDIR)/%.cpp
+	mkdir -p build_sdl
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ -MMD $< -MF "build_sdl/$(patsubst $(SRCDIR)/%,%,$(<:.cpp=.d))"
 
 clean:
