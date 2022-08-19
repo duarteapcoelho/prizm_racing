@@ -7,15 +7,14 @@
 #include "rmath.h"
 #include "math.h"
 
-#define NUM_CUBES 20
-
 mat4 view;
-vec3d carPos = {0, 0, 0};
-vec3d carSpeed = {0, 0, 0};
-fp carDirection = 0;
-fp carAngle = 0;
-fp cameraAngle = 0;
-fp wheelSpeed = 0;
+vec3f carPos = {0, 0, 0};
+vec3f cameraPos = {0, 0, 0};
+vec3f carSpeed = {0, 0, 0};
+float carDirection = 0;
+float carAngle = 0;
+float cameraAngle = 0;
+float wheelSpeed = 0;
 
 vec3d vertexShader(vec3d i, void *uniforms){
 	if(uniforms == nullptr)
@@ -724,35 +723,122 @@ int main(){
 
 	srand(0);
 
-	Triangle trackTriangles[100*2];
+	// Triangle treeTriangles[10*10];
+	// for(int x = 0; x < 10; x++){
+	// 	for(int y = 0; y < 10; y++){
+	// 		// int treeX = (x-50)*10;
+	// 		// int treeY = (y-50)*10;
+	// 		int treeX = ((rand()%100) - 50)*10;
+	// 		int treeY = ((rand()%100) - 50)*10;
+	// 		treeTriangles[x+y*10] = {
+	// 			{treeX-1, 0, treeY},
+	// 			{treeX, -1, treeY},
+	// 			{treeX+1, 0, treeY},
+	// 			newColor(0, 255, 0)
+	// 		};
+	// 	}
+	// }
+	// Mesh treeMesh = {
+	// 	10*10,
+	// 	treeTriangles
+	// };
 
-	for(int i = 0; i < 100; i++){
-		fp angle = fp(i) * fp(2*PI) / fp(100);
-		fp nextAngle = fp(i+1) * fp(2*PI) / fp(100);
-		printf("%.3f\n", (float)fp_sin(angle));
-		trackTriangles[i] = {
-			{fp_cos(angle)*fp(4), 0, fp_sin(angle)*fp(4)},
-			{fp_cos(angle)*fp(5), 0, fp_sin(angle)*fp(5)},
-			{fp_cos(nextAngle)*fp(4), 0, fp_sin(nextAngle)*fp(4)},
-			newColor(0, 0, 0)
-		};
-		trackTriangles[i].p0 = trackTriangles[i].p0 * fp(10);
-		trackTriangles[i].p1 = trackTriangles[i].p1 * fp(10);
-		trackTriangles[i].p2 = trackTriangles[i].p2 * fp(10);
-		trackTriangles[i+100] = {
-			{fp_cos(angle)*fp(5), 0, fp_sin(angle)*fp(5)},
-			{fp_cos(nextAngle)*fp(4), 0, fp_sin(nextAngle)*fp(4)},
-			{fp_cos(nextAngle)*fp(5), 0, fp_sin(nextAngle)*fp(5)},
-			newColor(255, 255, 255)
-		};
-		trackTriangles[i+100].p0 = trackTriangles[i+100].p0 * fp(10);
-		trackTriangles[i+100].p1 = trackTriangles[i+100].p1 * fp(10);
-		trackTriangles[i+100].p2 = trackTriangles[i+100].p2 * fp(10);
+#define TRACK_SEGMENTS 25
+#define TRACK_WIDTH 10
+	vec3d trackPoints[TRACK_SEGMENTS+1] = {
+		{0, 0, 0},
+		{2, 0, 0},
+		{4, 0, 0},
+		{6, 0, 0},
+		{8, 0, 0},
+		{10, 0, 0},
+		{12, 0, 1},
+		{13, 0, 3},
+		{13, 0, 5},
+		{12, 0, 7},
+		{10, 0, 9},
+		{8, 0, 10},
+		{6, 0, 10},
+		{4, 0, 10},
+		{2, 0, 10},
+		{0, 0, 10},
+		{-2, 0, 10},
+		{-4, 0, 10},
+		{-6, 0, 10},
+		{-8, 0, 10},
+		{-10, 0, 10},
+		{-12, 0, 10},
+		{-14, 0, 10},
+		{-16, 0, 10},
+		{-18, 0, 10},
+		{-20, 0, 10},
+	};
+
+	for(int i = 0; i < TRACK_SEGMENTS+1; i++){
+		trackPoints[i] = trackPoints[i] * 0.5;
 	}
 
+	Triangle trackTriangles[TRACK_SEGMENTS*2];
+
+	for(int i = 0; i < TRACK_SEGMENTS; i++){
+		vec3d pos = trackPoints[i] * fp(10);
+		vec3d nextPos = trackPoints[i+1] * fp(10);
+		
+		vec3d direction = nextPos - pos;
+		vec3d perpendicular = {direction.z, 0, fp(0)-direction.x};
+		direction = direction * TRACK_WIDTH;
+
+		perpendicular = perpendicular * fp_isqrt(perpendicular.x*perpendicular.x + perpendicular.y*perpendicular.y + perpendicular.z*perpendicular.z);
+		perpendicular = perpendicular * fp(TRACK_WIDTH);
+
+		trackTriangles[i] = {
+			pos - perpendicular,
+			nextPos - perpendicular,
+			nextPos + perpendicular,
+			newColor(50, 50, 50)
+		};
+		trackTriangles[TRACK_SEGMENTS+i] = {
+			pos + perpendicular,
+			nextPos + perpendicular,
+			pos - perpendicular,
+			newColor(50, 50, 50)
+		};
+	}
+
+	// for(int i = 0; i < TRACK_SEGMENTS; i++){
+	// 	fp angle = fp(i) * fp(2*PI) / fp(TRACK_SEGMENTS);
+	// 	fp nextAngle = fp(i+1) * fp(2*PI) / fp(TRACK_SEGMENTS);
+	// 	trackTriangles[i] = {
+	// 		{fp_cos(angle)*fp(4), 0, fp_sin(angle)*fp(4)},
+	// 		{fp_cos(angle)*fp(5), 0, fp_sin(angle)*fp(5)},
+	// 		{fp_cos(nextAngle)*fp(4), 0, fp_sin(nextAngle)*fp(4)},
+	// 		newColor(0, 0, 0)
+	// 	};
+	// 	trackTriangles[i].p0 = trackTriangles[i].p0 * fp(10);
+	// 	trackTriangles[i].p1 = trackTriangles[i].p1 * fp(10);
+	// 	trackTriangles[i].p2 = trackTriangles[i].p2 * fp(10);
+	// 	trackTriangles[i+TRACK_SEGMENTS] = {
+	// 		{fp_cos(angle)*fp(5), 0, fp_sin(angle)*fp(5)},
+	// 		{fp_cos(nextAngle)*fp(4), 0, fp_sin(nextAngle)*fp(4)},
+	// 		{fp_cos(nextAngle)*fp(5), 0, fp_sin(nextAngle)*fp(5)},
+	// 		newColor(255, 255, 255)
+	// 	};
+	// 	trackTriangles[i+TRACK_SEGMENTS].p0 = trackTriangles[i+TRACK_SEGMENTS].p0 * fp(10);
+	// 	trackTriangles[i+TRACK_SEGMENTS].p1 = trackTriangles[i+TRACK_SEGMENTS].p1 * fp(10);
+	// 	trackTriangles[i+TRACK_SEGMENTS].p2 = trackTriangles[i+TRACK_SEGMENTS].p2 * fp(10);
+	// }
+	
+	// Model trees = {
+	// 	.mesh = treeMesh,
+	// 	.shader = {
+	// 		.vertexShader = vertexShader,
+	// 		.fragmentShader = fragmentShader,
+	// 		.uniforms = nullptr
+	// 	}
+	// };
 	Model track = {
 		.mesh = {
-			100 * 2,
+			TRACK_SEGMENTS*2,
 			trackTriangles
 		},
 		.shader = {
@@ -773,6 +859,7 @@ int main(){
 		}
 	};
 
+	Rasterizer::init();
 	while(true){
 		Rasterizer::reset();
 
@@ -783,31 +870,39 @@ int main(){
 			return 0;
 		}
 
-		const fp speed = 0.02 * Time::delta;
-		const fp acceleration = fp(1);
-		if(Input::keyDown(KEY_RIGHT)){
-			carAngle = carAngle + speed;
+		if(Input::keyDown(KEY_RIGHT) || Input::keyDown(KEY_6)){
+			carDirection = carDirection + Time::delta / 40.0f;
 		}
-		if(Input::keyDown(KEY_LEFT)){
-			carAngle = carAngle - speed;
+		if(Input::keyDown(KEY_LEFT) || Input::keyDown(KEY_4)){
+			carDirection = carDirection - Time::delta / 40.0f;
 		}
-		wheelSpeed = 0;
-		if(Input::keyDown(KEY_UP)){
-			wheelSpeed = wheelSpeed + fp(2);
+
+		if(Input::keyDown(KEY_UP) || Input::keyDown(KEY_8)){
+			wheelSpeed = wheelSpeed + Time::delta / 200.0f;
 		}
-		if(Input::keyDown(KEY_DOWN)){
-			wheelSpeed = wheelSpeed - fp(2);
+		if(Input::keyDown(KEY_DOWN) || Input::keyDown(KEY_5)){
+			wheelSpeed = wheelSpeed - Time::delta / 200.0f;
 		}
-		// wheelSpeed = wheelSpeed / (fp(1000) * fp(Time::delta));
-		// if(wheelSpeed < 0)
-		// 	wheelSpeed = 0;
-		// wheelSpeed = wheelSpeed * fp(0.7);
-		carSpeed.x = carSpeed.x + wheelSpeed * fp(Time::delta) * fp_cos(carAngle) / fp(500);
-		carSpeed.z = carSpeed.z + wheelSpeed * fp(Time::delta) * fp_sin(fp(0)-(carAngle)) / fp(500);
-		// cameraAngle = fp(0) - fp_atan2(carSpeed.z, carSpeed.x);
-		cameraAngle = carAngle;
-		carPos.x = carPos.x + carSpeed.x * fp(Time::delta);
-		carPos.z = carPos.z + carSpeed.z * fp(Time::delta);
+
+		wheelSpeed = wheelSpeed - (wheelSpeed * 0.001f) * Time::delta;
+		if(wheelSpeed > 1)
+			wheelSpeed = 1;
+		if(wheelSpeed < 0)
+			wheelSpeed = 0;
+
+		carSpeed.x = carSpeed.x + wheelSpeed * float(fp_cos(fp(carAngle))) * Time::delta / 150.0f;
+		carSpeed.z = carSpeed.z + wheelSpeed * float(fp_sin(fp(0)-fp(carAngle))) * Time::delta / 150.0f;
+		carSpeed.x = carSpeed.x - (carSpeed.x * 0.01f) * Time::delta;
+		carSpeed.z = carSpeed.z - (carSpeed.z * 0.01f) * Time::delta;
+
+		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * carDirection) * Time::delta;
+		carAngle = carAngle + (-carAngle * 0.05 + 0.05 * carDirection) * Time::delta;
+		// carAngle = carDirection;
+		carPos.x = carPos.x + carSpeed.x * Time::delta;
+		carPos.z = carPos.z + carSpeed.z * Time::delta;
+		// vec3f zero = {0,0,0};
+		// cameraPos = cameraPos + (zero - cameraPos * 0.2f + carPos * 0.2f) * Time::delta;
+		cameraPos = carPos;
 
 		Display::clear(newColor(70, 180, 220));
 
@@ -818,9 +913,11 @@ int main(){
 		view = mat4();
 		view = mat4::rotateX(view, HALF_PI*0.1);
 		view = mat4::translate(view, 0, 2, 6);
-		view = mat4::rotateY(view, fp(0) - cameraAngle - fp(HALF_PI));
-		view = mat4::translate(view, fp(0)-carPos.x, 0, fp(0)-carPos.z);
+		view = mat4::rotateY(view, -cameraAngle - HALF_PI);
+		view = mat4::translate(view, -cameraPos.x, 0, -cameraPos.z);
 
+		// Rasterizer::drawModel(trees, false);
+		// Rasterizer::drawTriangle(trees.mesh.triangles[51+51*100], trees.shader, false);
 		Rasterizer::drawModel(track, false);
 		Rasterizer::drawModel(car, true);
 

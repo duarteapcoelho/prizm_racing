@@ -19,11 +19,17 @@ struct Color {
 #ifdef PRIZM
 	unsigned short color;
 	char textColor;
+	bool operator != (Color o){
+		return color != o.color;
+	}
 #endif
 #ifdef SDL
 	int r;
 	int g;
 	int b;
+	bool operator != (Color o){
+		return r != o.r || g != o.g || b != o.b;
+	}
 #endif
 };
 

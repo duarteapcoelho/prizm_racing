@@ -12,8 +12,10 @@ Color newColor(int r, int g, int b){
 
 namespace Display {
 	int textHeight = 10;
+	unsigned short *VRAMAddress;
 
 	void init(){
+		VRAMAddress = (unsigned short*)GetVRAMAddress();
 	}
 
 	void clear(Color color){
@@ -27,7 +29,7 @@ namespace Display {
 	}
 	void destroy(){}
 	void fillRect(int x, int y, int w, int h, Color color){
-		unsigned short*s=(unsigned short*)GetVRAMAddress();
+		unsigned short*s=VRAMAddress;
 		s+=(y*384)+x;
 		while(h--){
 			unsigned w2=w;
@@ -37,7 +39,8 @@ namespace Display {
 		}
 	}
 	void drawPoint(int x, int y, Color color){
-		Bdisp_SetPoint_VRAM(x, y, color.color);
+		// Bdisp_SetPoint_VRAM(x, y, color.color);
+		*(VRAMAddress + x + y * DISPLAY_WIDTH) = color.color;
 	}
 	int textWidth(const char *text){
 		return strlen(text)*6;

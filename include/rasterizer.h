@@ -4,10 +4,10 @@
 #include "vector.h"
 #include "display.h"
 
-#define NEAR_PLANE 0.5
+#define NEAR_PLANE 0.1
 #define FAR_PLANE 100
 
-#define PIXEL_SIZE 2
+#define PIXEL_SIZE 4
 #define RENDER_WIDTH (DISPLAY_WIDTH/PIXEL_SIZE)
 #define RENDER_HEIGHT (DISPLAY_HEIGHT/PIXEL_SIZE)
 
@@ -35,6 +35,7 @@ struct Model {
 };
 
 namespace Rasterizer {
+	void init();
 	void reset();
 	extern fp *depthBuffer;
 
