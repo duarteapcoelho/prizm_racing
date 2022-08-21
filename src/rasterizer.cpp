@@ -137,7 +137,7 @@ namespace Rasterizer {
 		}
 
 		for(int y = minY; y < maxY; y++){
-			bool hasEntered = false;
+			// bool hasEntered = false;
 			int ie1 = e1;
 			int ie2 = e2;
 			int ie3 = e3;
@@ -154,31 +154,21 @@ namespace Rasterizer {
 						vec3d b = {i_bary_u, i_bary_v, i_bary_w};
 						// i_z = (b.x * i_p0z + b.y * i_p1z + b.z * i_p2z);
 						i_z.i = ((b.x.i * i_p0z.i) + (b.y.i * i_p1z.i) + (b.z.i * i_p2z.i));
-						visible = visible && (i_z > depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1);
-					}
-					if(visible){
-						// Color c = shader.fragmentShader(triangle.c, shader.uniforms);
-						// if((ie1 >= -2 && ie1 <= 2)
-						// 		|| (ie2 >= -2 && ie2 <= 2)
-						// 		|| (ie3 >= -2 && ie3 <= 2))
-						// 	c = {255 - c.r, 255 - c.g, 255 - c.b};
-						if(useDepth){
+						if(i_z > depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1){
 							depthBuffer[x+y*RENDER_WIDTH] = i_z;
-							// if(!(i_z == 0)){
-							// c.r = (int)(fp(c.r) * i_z * fp(100));
-							// c.g = (int)(fp(c.g) * i_z * fp(100));
-							// c.b = (int)(fp(c.b) * i_z * fp(100));
-							// }
+#if PIXEL_SIZE == 1
+							Display::drawPoint(x, y, triangle.c);
+#else
+							Display::fillRect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, triangle.c);
+#endif
 						}
+					} else {
 #if PIXEL_SIZE == 1
 						Display::drawPoint(x, y, triangle.c);
 #else
 						Display::fillRect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, triangle.c);
 #endif
 					}
-					hasEntered = true;
-				} else if(hasEntered) {
-					break;
 				}
 				ie1 += (p0.y - p1.y);
 				ie2 += (p1.y - p2.y);

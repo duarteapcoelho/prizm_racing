@@ -35,7 +35,7 @@ MKG3AFLAGS := -n basic:test -i uns:../unselected.bmp -i sel:../selected.bmp
 # (LTO). Doing so will usually allow the compiler to generate much better code
 # (smaller and/or faster), but may expose bugs in your code that don't cause
 # any trouble without LTO enabled.
-CFLAGS	= -Ofast -Wall -Wextra $(MACHDEP) $(INCLUDE) -DPRIZM
+CFLAGS	= -Ofast -Wall -Wextra $(MACHDEP) $(INCLUDE) -DPRIZM -funroll-loops
 CXXFLAGS	=	$(CFLAGS) -fno-exceptions
 
 LDFLAGS	= $(MACHDEP) -T$(FXCGSDK)/toolchain/prizm.x -Wl,-static -Wl,-gc-sections
