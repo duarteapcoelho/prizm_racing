@@ -84,6 +84,9 @@ namespace Display {
 		textRect.y = y;
 		TTF_SizeText(font, text, &textRect.w, &textRect.h);
 		SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+		SDL_DestroyTexture(textTexture);
+		SDL_FreeSurface(textSurface);
 	}
 };
 #endif
