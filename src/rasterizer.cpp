@@ -79,90 +79,132 @@ namespace Rasterizer {
 		};
 	}
 
+	struct Edge {
+		int minY;
+		int maxY;
+		fp x;
+		fp m;
+		Edge *next;
+	};
+	Edge *newEdge(vec3i p0, vec3i p1){
+		Edge *e = (Edge*) malloc(sizeof(Edge));
+
+		if(p0.y > p1.y){
+			*e = {
+				p1.y,
+				p0.y,
+				p1.x,
+				fp(p0.x - p1.x) / fp(p0.y - p1.y),
+				nullptr
+			};
+		} else if(p0.y < p1.y){
+			*e = {
+				p0.y,
+				p1.y,
+				p0.x,
+				fp(p1.x - p0.x) / fp(p1.y - p0.y),
+				nullptr
+			};
+		} else {
+			free(e);
+			return nullptr;
+		}
+
+		return e;
+	}
+
 	void _drawTriangle(Triangle triangle, Shader shader, bool useDepth){
 		vec3d p0_d = toDevice(triangle.p0);
 		vec3d p1_d = toDevice(triangle.p1);
 		vec3d p2_d = toDevice(triangle.p2);
 
-		fp winding = cross({p1_d.x - p0_d.x, p1_d.y - p0_d.y, 0}, {p2_d.x - p0_d.x, p2_d.y - p0_d.y, 0});
+		vec3i p0 = toScreen(p0_d);
+		vec3i p1 = toScreen(p1_d);
+		vec3i p2 = toScreen(p2_d);
 
-		vec3i p0, p1, p2;
-
-		if(winding > 0){
-			p0 = toScreen(p0_d);
-			p1 = toScreen(p1_d);
-			p2 = toScreen(p2_d);
-		} else {
-			p0 = toScreen(p0_d);
-			p1 = toScreen(p2_d);
-			p2 = toScreen(p1_d);
-		}
-
-		int minX = max(min(min(p0.x, p1.x), p2.x), 0);
-		int maxX = min(max(max(p0.x, p1.x), p2.x), RENDER_WIDTH);
 		int minY = max(min(min(p0.y, p1.y), p2.y), 0);
 		int maxY = min(max(max(p0.y, p1.y), p2.y), RENDER_HEIGHT);
+		fp z = (p0.z + p1.z + p2.z) / 3;
 
-		int e1 = edge({minX, minY, 0}, p0, p1);
-		int e2 = edge({minX, minY, 0}, p1, p2);
-		int e3 = edge({minX, minY, 0}, p2, p0);
+		Edge *edgeTable[RENDER_HEIGHT];
+		Edge *edges[3] = {
+			newEdge(p0, p1),
+			newEdge(p1, p2),
+			newEdge(p2, p0),
+		};
 
-		fp bary_v, bary_w, bary_u;
-		fp i_p0z, i_p1z, i_p2z;
-		fp bary_v_per_x, bary_w_per_x, bary_u_per_x, bary_v_per_y, bary_w_per_y, bary_u_per_y;
-		if(useDepth){
-			const vec3i bary_v0 = {(p1.x - p0.x), (p1.y - p0.y), 0};
-			const vec3i bary_v1 = {(p2.x - p0.x), (p2.y - p0.y), 0};
-			fp bary_denom = (bary_v0.x * bary_v1.y - bary_v1.x * bary_v0.y);
-			if(bary_denom == 0)
-				return;
-			const fp i_bary_denom = fp(1000) / fp(bary_v0.x * bary_v1.y - bary_v1.x * bary_v0.y);
-
-			const vec3i bary_v2 = {minX - p0.x, minY - p0.y, 0};
-			bary_v_per_x = fp(bary_v1.y) * fp(i_bary_denom) / fp(1000);
-			bary_w_per_x = fp(0) - fp(bary_v0.y) * fp(i_bary_denom) / fp(1000);
-			bary_u_per_x = fp(0) - bary_v_per_x - bary_w_per_x;
-
-			bary_v_per_y = fp(0) - fp(bary_v1.x) * fp(i_bary_denom) / fp(1000);
-			bary_w_per_y = fp(bary_v0.x) * fp(i_bary_denom) / fp(1000);
-			bary_u_per_y = fp(0) -bary_v_per_y - bary_w_per_y;
-
-			bary_v = fp(bary_v2.x * bary_v1.y - bary_v1.x * bary_v2.y) / fp(1000) * fp(i_bary_denom);
-			bary_w = fp(bary_v0.x * bary_v2.y - bary_v2.x * bary_v0.y) / fp(1000) * fp(i_bary_denom);
-			bary_u = fp(1) - bary_v - bary_w;
-
-			i_p0z = fp(1)/fp(p0.z);
-			i_p1z = fp(1)/fp(p1.z);
-			i_p2z = fp(1)/fp(p2.z);
+		for(int y = 0; y < RENDER_HEIGHT; y++){
+			edgeTable[y] = nullptr;
+			for(int i = 0; i < 3; i++){
+				if(edges[i] != nullptr){
+					if(edges[i]->minY == y){
+						Edge **e = &(edgeTable[y]);
+						while(*e != nullptr){
+							e = &((*e)->next);
+						}
+						*e = edges[i];
+					}
+				}
+			}
 		}
 
+		Edge *activeEdgeList = nullptr;
+
 		for(int y = minY; y < maxY; y++){
-			// bool hasEntered = false;
-			int ie1 = e1;
-			int ie2 = e2;
-			int ie3 = e3;
+			// add new edges to the list
+			if(edgeTable[y] != nullptr){
+				Edge **e;
+				for(e = &activeEdgeList; *e != nullptr; e = &((*e)->next)){
+				}
+				*e = edgeTable[y];
+			}
 
-			fp i_bary_v = bary_v;
-			fp i_bary_w = bary_w;
-			fp i_bary_u = bary_u;
+			// remove edges from the list
+			for(Edge **e = &activeEdgeList; *e != nullptr;){
+				if(y == (*e)->maxY){
+					*e = (*e)->next;
+				} else {
+					e = &((*e)->next);
+				}
+			}
 
-			for(int x = minX; x < maxX; x++){
-				if(ie1 >= 0 && ie2 >= 0 && ie3 >= 0) {
-					bool visible = true;
-					fp i_z;
-					if(useDepth){
-						vec3d b = {i_bary_u, i_bary_v, i_bary_w};
-						// i_z = (b.x * i_p0z + b.y * i_p1z + b.z * i_p2z);
-						i_z.i = ((b.x.i * i_p0z.i) + (b.y.i * i_p1z.i) + (b.z.i * i_p2z.i));
-						if(i_z > depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1){
-							depthBuffer[x+y*RENDER_WIDTH] = i_z;
-#if PIXEL_SIZE == 1
-							Display::drawPoint(x, y, triangle.c);
-#else
-							Display::fillRect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, triangle.c);
-#endif
-						}
-					} else {
+			// calculate intersection point
+			for(Edge *e = activeEdgeList; e != nullptr; e = e->next){
+				e->x = e->x + e->m;
+			}
+
+			// sort by intersection point using injection sort:
+			Edge *sortedEdgeList = nullptr;
+
+			// sort
+			for(Edge *e = activeEdgeList; e != nullptr;){
+				Edge *next = e->next;
+				for(Edge **f = &sortedEdgeList;; f = &((*f)->next)){
+					if(*f == nullptr){
+						*f = e;
+						(*f)->next = nullptr;
+						break;
+					}
+					if((*f)->x > e->x){
+						Edge *a = *f;
+						*f = e;
+						e->next = a;
+						break;
+					}
+				}
+				e = next;
+			}
+
+			activeEdgeList = sortedEdgeList;
+
+			// draw
+			for(Edge *e = activeEdgeList; e != nullptr; e = e->next->next){
+				int minX = min(max(e->x, 0), RENDER_WIDTH);
+				int maxX = max(min(e->next->x, RENDER_WIDTH), 0);
+				for(int x = minX; x < maxX; x++){
+					if(z < depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1 || !useDepth){
+						if(useDepth)
+							depthBuffer[x+y*RENDER_WIDTH] = z;
 #if PIXEL_SIZE == 1
 						Display::drawPoint(x, y, triangle.c);
 #else
@@ -170,26 +212,18 @@ namespace Rasterizer {
 #endif
 					}
 				}
-				ie1 += (p0.y - p1.y);
-				ie2 += (p1.y - p2.y);
-				ie3 += (p2.y - p0.y);
-
-				if(useDepth){
-					i_bary_v = i_bary_v + bary_v_per_x;
-					i_bary_w = i_bary_w + bary_w_per_x;
-					i_bary_u = i_bary_u + bary_u_per_x;
-				}
+				// if(z < depthBuffer[y] || depthBuffer[y] == -1 || !useDepth){
+				// 	if(useDepth)
+				// 		depthBuffer[y] = z;
+				// 	Display::fillRect(minX * PIXEL_SIZE, y*PIXEL_SIZE, (maxX - minX) * PIXEL_SIZE, PIXEL_SIZE, triangle.c);
+				// }
 			}
-			e1 -= (p0.x - p1.x);
-			e2 -= (p1.x - p2.x);
-			e3 -= (p2.x - p0.x);
+		}
 
-			if(useDepth){
-				bary_v = bary_v + bary_v_per_y;
-				bary_w = bary_w + bary_w_per_y;
-				bary_u = bary_u + bary_u_per_y;
+		for(int i = 0; i < 3; i++){
+			if(edges[i] != nullptr){
+				free(edges[i]);
 			}
-
 		}
 	}
 
