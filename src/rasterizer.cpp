@@ -332,11 +332,25 @@ namespace Rasterizer {
 			return;
 		}
 
-		Mesh mesh = clipTriangle(triangle);
-		for(int i = 0; i < mesh.numTriangles; i++){
-			_drawTriangle(model, mesh.triangles[i], useDepth, isShaded);
+		bool allInside = true;
+		for(int i = 0; i < 5; i++){
+			if(dot3(clippingPlanes[i].n, triangle.p0) + clippingPlanes[i].d < 0
+					|| dot3(clippingPlanes[i].n, triangle.p1) + clippingPlanes[i].d < 0
+					|| dot3(clippingPlanes[i].n, triangle.p2) + clippingPlanes[i].d < 0){
+				allInside = false;
+				break;
+			}
 		}
-		free(mesh.triangles);
+
+		if(allInside){
+			_drawTriangle(model, triangle, useDepth, isShaded);
+		} else {
+			Mesh mesh = clipTriangle(triangle);
+			for(int i = 0; i < mesh.numTriangles; i++){
+				_drawTriangle(model, mesh.triangles[i], useDepth, isShaded);
+			}
+			free(mesh.triangles);
+		}
 	}
 
 };

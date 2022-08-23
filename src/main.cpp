@@ -993,9 +993,6 @@ int main(){
 		view = mat4::rotateY(view, -cameraAngle - HALF_PI);
 		view = mat4::translate(view, -cameraPos.x, 0, -cameraPos.z);
 
-		// Rasterizer::drawModel(trees, false);
-		// Rasterizer::drawTriangle(trees.mesh.triangles[51+51*100], trees.shader, false);
-
 		carModel.modelMatrix = carMatrix;
 		carModel.viewMatrix = view;
 
@@ -1012,6 +1009,7 @@ int main(){
 		// sprintf(buffer, "%d", (int)Time::delta);
 		itoa((int)Time::delta, (unsigned char*)buffer);
 #endif
+		// Display::fillRect(0, 0, 30, 20, newColor(0, 0, 0));
 		Display::drawText(0, 0, buffer, newColor(255, 255, 255));
 
 		Display::show();
