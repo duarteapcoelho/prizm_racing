@@ -130,7 +130,7 @@ namespace Rasterizer {
 			newEdge(p2, p0),
 		};
 
-		for(int y = 0; y < RENDER_HEIGHT; y++){
+		for(int y = minY; y < maxY; y++){
 			edgeTable[y] = nullptr;
 			for(int i = 0; i < 3; i++){
 				if(edges[i] != nullptr){
