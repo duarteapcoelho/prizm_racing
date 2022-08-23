@@ -3,6 +3,7 @@
 #include "fp.h"
 #include "vector.h"
 #include "display.h"
+#include "mat4.h"
 
 #define NEAR_PLANE 0.1
 #define FAR_PLANE 100
@@ -15,6 +16,7 @@ struct Triangle {
 	vec3d p0;
 	vec3d p1;
 	vec3d p2;
+	vec3d normal;
 	Color c;
 };
 
@@ -29,9 +31,14 @@ struct Shader {
 	void *uniforms;
 };
 
-struct Model {
+class Model {
+public:
 	Mesh mesh;
-	Shader shader;
+	mat4 modelMatrix;
+	mat4 viewMatrix;
+	Model();
+	Model(Mesh mesh);
+	void draw(bool useDepth, bool isShaded);
 };
 
 namespace Rasterizer {
@@ -42,7 +49,7 @@ namespace Rasterizer {
 	vec3d toDevice(vec3d p);
 	vec3i toScreen(vec3d p);
 	void drawLine(vec3d p0, vec3d p1);
-	void drawTriangle(Triangle triangle, Shader shader, bool useDepth);
-	void drawModel(Model model, bool useDepth);
+	void drawTriangle(Model *model, Triangle triangle, Shader shader, bool useDepth, bool isShaded);
+	void drawModel(Model model, bool useDepth, bool isShaded);
 
 };

@@ -14,6 +14,8 @@ DEPS = $(patsubst $(SRCDIR)/%,build_sdl/%,$(SOURCES:.cpp=.d))
 
 TARGET = racing
 
+all: debug
+
 debug: CFLAGS += -Og -g
 debug: $(TARGET)
 

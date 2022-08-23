@@ -175,4 +175,17 @@ public:
 		t.m[1][1] = fp_cos(angle);
 		return matrix * t;
 	}
+	static mat4 toMat3(mat4 matrix){
+		mat4 t = matrix;
+		t.m[3][0] = 0;
+		t.m[3][1] = 0;
+		t.m[3][2] = 0;
+		t.m[3][3] = 0;
+
+		t.m[0][3] = 0;
+		t.m[1][3] = 0;
+		t.m[2][3] = 0;
+		t.m[3][3] = 0;
+		return t;
+	}
 };

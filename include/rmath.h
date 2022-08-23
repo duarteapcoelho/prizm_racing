@@ -5,8 +5,17 @@
 #define PI 3.141592654
 #define HALF_PI 1.570796327
 
-fp fp_abs(fp v);
-fp fp_floor(fp x);
+inline fp fp_abs(fp v){
+	if(v < 0){
+		return fp(0) - v;
+	} else {
+		return v;
+	}
+}
+inline fp fp_floor(fp x){
+	int i = (int)x;
+	return i - (fp(i) > x);
+}
 
 #define SIN_SAMPLES 100
 extern fp *sinTable;

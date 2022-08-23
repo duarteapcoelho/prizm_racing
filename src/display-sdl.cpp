@@ -55,20 +55,6 @@ namespace Display {
 		SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
 		SDL_RenderClear(renderer);
 	}
-	void fillRect(int x, int y, int w, int h, Color color){
-		SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-		SDL_Rect rect;
-		rect.x = x;
-		rect.y = y;
-		rect.w = w;
-		rect.h = h;
-		SDL_RenderFillRect(renderer, &rect);
-	}
-	void drawPoint(int x, int y, Color color){
-		SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
-		SDL_RenderDrawPoint(renderer, x, y);
-	}
-
 	int textWidth(const char *text){
 		int w;
 		TTF_SizeText(font, text, &w, NULL);

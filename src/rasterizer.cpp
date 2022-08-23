@@ -8,33 +8,23 @@ struct Plane {
 	fp d;
 };
 
-int min(int a, int b){
+inline int min(int a, int b){
 	if(a < b)
 		return a;
 	return b;
 }
 
-int max(int a, int b){
+inline int max(int a, int b){
 	if(a > b)
 		return a;
 	return b;
 }
 
-#ifdef PRIZM
-float abs(float v){
-	if(v < 0){
-		return 0 - v;
-	} else {
-		return v;
-	}
-}
-#endif
-
-fp dot3(vec3d a, vec3d b){
+inline fp dot3(vec3d a, vec3d b){
 	return a.x*b.x + a.y*b.y + a.z*b.z;
 }
 
-fp cross(vec3d a, vec3d b){
+inline fp cross(vec3d a, vec3d b){
 	return (a.x*b.y) - (a.y*b.x);
 }
 
@@ -46,15 +36,10 @@ namespace Rasterizer {
 	void init(){
 #define I_SQRT_2 0.707106
 		clippingPlanes[0] = {{0, 0, 1}, fp(0)-fp(NEAR_PLANE)}; // near
-		// clippingPlanes[1] = {{0, 0, 1}, fp(0)-fp(FAR_PLANE)}; // far
 		clippingPlanes[1] = {{fp(I_SQRT_2), 0, fp(I_SQRT_2)}, 0}; // left
 		clippingPlanes[2] = {{fp(-I_SQRT_2), 0, fp(I_SQRT_2)}, 0}; // right
 		clippingPlanes[3] = {{0, fp(I_SQRT_2), fp(I_SQRT_2)}, 0}; // bottom
 		clippingPlanes[4] = {{0, fp(-I_SQRT_2), fp(I_SQRT_2)}, 0}; // top
-	}
-
-	int edge(vec3i p, vec3i e1, vec3i e2){
-		return (p.x - e2.x) * (e1.y - e2.y) - (p.y - e2.y) * (e1.x - e2.x);
 	}
 
 	void reset(){
@@ -63,7 +48,7 @@ namespace Rasterizer {
 		}
 	}
 
-	vec3d toDevice(vec3d p){
+	inline vec3d toDevice(vec3d p){
 		return {
 			p.x / p.z,
 			p.y / p.z,
@@ -71,7 +56,7 @@ namespace Rasterizer {
 		};
 	}
 
-	vec3i toScreen(vec3d p){
+	inline vec3i toScreen(vec3d p){
 		return {
 			p.x * fp(RENDER_WIDTH) + fp(RENDER_WIDTH / 2.0f),
 			p.y * fp(RENDER_WIDTH) + fp(RENDER_HEIGHT / 2.0f),
@@ -86,7 +71,7 @@ namespace Rasterizer {
 		fp m;
 		Edge *next;
 	};
-	Edge *newEdge(vec3i p0, vec3i p1){
+	inline Edge *newEdge(vec3i p0, vec3i p1){
 		Edge *e = (Edge*) malloc(sizeof(Edge));
 
 		if(p0.y > p1.y){
@@ -113,7 +98,7 @@ namespace Rasterizer {
 		return e;
 	}
 
-	void _drawTriangle(Triangle triangle, Shader shader, bool useDepth){
+	inline void _drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded){
 		vec3d p0_d = toDevice(triangle.p0);
 		vec3d p1_d = toDevice(triangle.p1);
 		vec3d p2_d = toDevice(triangle.p2);
@@ -125,6 +110,18 @@ namespace Rasterizer {
 		int minY = max(min(min(p0.y, p1.y), p2.y), 0);
 		int maxY = min(max(max(p0.y, p1.y), p2.y), RENDER_HEIGHT);
 		fp z = (p0.z + p1.z + p2.z) / 3;
+
+		if(isShaded){
+			fp brightness = dot3(mat4::toMat3(model->modelMatrix) * triangle.normal, {-0.2, -0.6, 0.2}) + fp(0.2);
+			if(brightness > 1)
+				brightness = 1;
+			if(brightness < 0)
+				brightness = 0;
+			triangle.c.r = fp(triangle.c.r) * brightness;
+			triangle.c.g = fp(triangle.c.g) * brightness;
+			triangle.c.b = fp(triangle.c.b) * brightness;
+			triangle.c = newColor(triangle.c.r, triangle.c.g, triangle.c.b);
+		}
 
 		Edge *edgeTable[RENDER_HEIGHT];
 		Edge *edges[3] = {
@@ -173,34 +170,12 @@ namespace Rasterizer {
 				e->x = e->x + e->m;
 			}
 
-			// sort by intersection point using injection sort:
-			Edge *sortedEdgeList = nullptr;
-
-			// sort
-			for(Edge *e = activeEdgeList; e != nullptr;){
-				Edge *next = e->next;
-				for(Edge **f = &sortedEdgeList;; f = &((*f)->next)){
-					if(*f == nullptr){
-						*f = e;
-						(*f)->next = nullptr;
-						break;
-					}
-					if((*f)->x > e->x){
-						Edge *a = *f;
-						*f = e;
-						e->next = a;
-						break;
-					}
-				}
-				e = next;
-			}
-
-			activeEdgeList = sortedEdgeList;
-
 			// draw
 			for(Edge *e = activeEdgeList; e != nullptr; e = e->next->next){
-				int minX = min(max(e->x, 0), RENDER_WIDTH);
-				int maxX = max(min(e->next->x, RENDER_WIDTH), 0);
+				int a = min(max(e->x, 0), RENDER_WIDTH);
+				int b = max(min(e->next->x, RENDER_WIDTH), 0);
+				int minX = min(a,b);
+				int maxX = max(a,b);
 				for(int x = minX; x < maxX; x++){
 					if(z < depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1 || !useDepth){
 						if(useDepth)
@@ -212,11 +187,6 @@ namespace Rasterizer {
 #endif
 					}
 				}
-				// if(z < depthBuffer[y] || depthBuffer[y] == -1 || !useDepth){
-				// 	if(useDepth)
-				// 		depthBuffer[y] = z;
-				// 	Display::fillRect(minX * PIXEL_SIZE, y*PIXEL_SIZE, (maxX - minX) * PIXEL_SIZE, PIXEL_SIZE, triangle.c);
-				// }
 			}
 		}
 
@@ -227,7 +197,7 @@ namespace Rasterizer {
 		}
 	}
 
-	Mesh clipTriangleAgainstPlane(Triangle triangle, Plane plane){
+	inline Mesh clipTriangleAgainstPlane(Triangle triangle, Plane plane){
 		int numClipped = 0;
 		bool clippedP0 = false;
 		bool clippedP1 = false;
@@ -278,7 +248,7 @@ namespace Rasterizer {
 			vec3d C = notClipped + (clipped[1] - notClipped) * ((fp(0) - plane.d - dot3(plane.n, notClipped))/d1);
 
 			Mesh m = {1, (Triangle*)malloc(sizeof(Triangle))};
-			m.triangles[0] = {notClipped, B, C, triangle.c};
+			m.triangles[0] = {notClipped, B, C, triangle.normal, triangle.c};
 			return m;
 		} else if(numClipped == 1){
 			vec3d clipped;
@@ -310,15 +280,15 @@ namespace Rasterizer {
 			vec3d B = notClipped[1] + (clipped - notClipped[1]) * ((fp(0) - plane.d - dot3(plane.n, notClipped[1]))/d1);
 
 			Mesh m = {2, (Triangle*)malloc(2*sizeof(Triangle))};
-			m.triangles[0] = {notClipped[0], A, notClipped[1], triangle.c};
-			m.triangles[1] = {notClipped[1], A, B, triangle.c};
+			m.triangles[0] = {notClipped[0], A, notClipped[1], triangle.normal, triangle.c};
+			m.triangles[1] = {notClipped[1], A, B, triangle.normal, triangle.c};
 			return m;
 		}
 
 		return {0, nullptr};
 	}
 
-	Mesh clipMeshAgainstPlane(Mesh mesh, Plane plane){
+	inline Mesh clipMeshAgainstPlane(Mesh mesh, Plane plane){
 		Mesh r = {0, nullptr};
 
 		for(int i = 0; i < mesh.numTriangles; i++){
@@ -339,24 +309,24 @@ namespace Rasterizer {
 		return r;
 	}
 
-	Mesh clipMesh(Mesh mesh){
+	inline Mesh clipMesh(Mesh mesh){
 		for(int i = 0; i < 5; i++){
 			mesh = clipMeshAgainstPlane(mesh, clippingPlanes[i]);
 		}
 		return mesh;
 	}
 
-	Mesh clipTriangle(Triangle triangle){
+	inline Mesh clipTriangle(Triangle triangle){
 		Mesh m = {1, (Triangle*)malloc(sizeof(Triangle))};
 		m.triangles[0] = triangle;
 		m = clipMesh(m);
 		return m;
 	}
 
-	void drawTriangle(Triangle triangle, Shader shader, bool useDepth){
-		triangle.p0 = shader.vertexShader(triangle.p0, shader.uniforms);
-		triangle.p1 = shader.vertexShader(triangle.p1, shader.uniforms);
-		triangle.p2 = shader.vertexShader(triangle.p2, shader.uniforms);
+	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded){
+		triangle.p0 = model->viewMatrix * model->modelMatrix * triangle.p0;
+		triangle.p1 = model->viewMatrix * model->modelMatrix * triangle.p1;
+		triangle.p2 = model->viewMatrix * model->modelMatrix * triangle.p2;
 
 		if(triangle.p0 == triangle.p1 || triangle.p1 == triangle.p2 || triangle.p2 == triangle.p0){
 			return;
@@ -364,14 +334,21 @@ namespace Rasterizer {
 
 		Mesh mesh = clipTriangle(triangle);
 		for(int i = 0; i < mesh.numTriangles; i++){
-			_drawTriangle(mesh.triangles[i], shader, useDepth);
+			_drawTriangle(model, mesh.triangles[i], useDepth, isShaded);
 		}
 		free(mesh.triangles);
 	}
 
-	void drawModel(Model model, bool useDepth){
-		for(int i = 0; i < model.mesh.numTriangles; i++){
-			drawTriangle(model.mesh.triangles[i], model.shader, useDepth);
-		}
-	}
 };
+
+Model::Model(){
+	mesh = {0, nullptr};
+}
+Model::Model(Mesh mesh){
+	this->mesh = mesh;
+}
+void Model::draw(bool useDepth, bool isShaded){
+	for(int i = 0; i < mesh.numTriangles; i++){
+		Rasterizer::drawTriangle(this, mesh.triangles[i], useDepth, isShaded);
+	}
+}

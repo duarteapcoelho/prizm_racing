@@ -1,18 +1,5 @@
 #include "rmath.h"
 
-fp fp_abs(fp v){
-	if(v < 0){
-		return fp(0) - v;
-	} else {
-		return v;
-	}
-}
-
-fp fp_floor(fp x){
-	int i = (int)x;
-	return i - (fp(i) > x);
-}
-
 const double DOUBLE_PI   = 6.283185307179586;
 const double SIN_CURVE_A = 0.0415896;
 const double SIN_CURVE_B = 0.00129810625032;
