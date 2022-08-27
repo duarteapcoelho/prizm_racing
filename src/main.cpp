@@ -866,9 +866,9 @@ int main(){
 	// 	treeTriangles
 	// };
 
-#define TRACK_SEGMENTS 25
+#define NUM_TRACK_POINTS 25
 #define TRACK_WIDTH 10
-	vec3d trackPoints[TRACK_SEGMENTS+1] = {
+	vec3d trackPoints[NUM_TRACK_POINTS+1] = {
 		{0, 0, 0},
 		{2, 0, 0},
 		{4, 0, 0},
@@ -896,41 +896,41 @@ int main(){
 		{-18, 0, 10},
 		{-20, 0, 10},
 	};
-
-	for(int i = 0; i < TRACK_SEGMENTS+1; i++){
-		trackPoints[i] = trackPoints[i] * 0.5;
+	fp h = 0;
+	for(int i = 0; i < NUM_TRACK_POINTS+1; i++){
+		trackPoints[i] = trackPoints[i] * 5;
+		// trackPoints[i].y = trackPoints[i].y + fp_sin(h);
+		// h = h + fp(1);
 	}
 
-	Triangle trackTriangles[TRACK_SEGMENTS*2];
+	Triangle trackTriangles[NUM_TRACK_POINTS*2-2];
 
-	for(int i = 0; i < TRACK_SEGMENTS; i++){
-		vec3d pos = trackPoints[i] * fp(10);
-		vec3d nextPos = trackPoints[i+1] * fp(10);
-		
-		vec3d direction = nextPos - pos;
-		vec3d perpendicular = {direction.z, 0, fp(0)-direction.x};
-		direction = direction * TRACK_WIDTH;
-
-		perpendicular = perpendicular * fp_isqrt(perpendicular.x*perpendicular.x + perpendicular.y*perpendicular.y + perpendicular.z*perpendicular.z);
-		perpendicular = perpendicular * fp(TRACK_WIDTH);
+	for(int i = 0; i < NUM_TRACK_POINTS-1; i++){
+		vec3d pos = trackPoints[i];
+		vec3d direction = trackPoints[i+1] - pos;
+		vec3d nextDirection = trackPoints[i+2] - trackPoints[i+1];
+		vec3d perpendicular = {direction.z, direction.y, fp(0)-direction.x};
+		perpendicular = perpendicular.normalized() * fp(10);
+		vec3d nextPerpendicular = {nextDirection.z, nextDirection.y, fp(0)-nextDirection.x};
+		nextPerpendicular = nextPerpendicular.normalized() * fp(10);
 
 		trackTriangles[i] = {
 			pos - perpendicular,
-			nextPos - perpendicular,
-			nextPos + perpendicular,
+			pos + perpendicular,
+			pos - nextPerpendicular + direction,
 			{0, -1, 0},
 			newColor(50, 50, 50)
 		};
-		trackTriangles[TRACK_SEGMENTS+i] = {
+		trackTriangles[i+NUM_TRACK_POINTS-1] = {
 			pos + perpendicular,
-			nextPos + perpendicular,
-			pos - perpendicular,
+			pos - nextPerpendicular + direction,
+			pos + nextPerpendicular + direction,
 			{0, -1, 0},
 			newColor(50, 50, 50)
 		};
 	}
 
-	Model trackModel = Model({TRACK_SEGMENTS*2, trackTriangles});
+	Model trackModel = Model({NUM_TRACK_POINTS*2-2, trackTriangles});
 
 	mat4 carMatrix;
 

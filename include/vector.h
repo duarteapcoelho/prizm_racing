@@ -1,5 +1,6 @@
 #pragma once
 #include "fp.h"
+#include "rmath.h"
 
 struct vec3i {
 	int x;
@@ -32,6 +33,11 @@ struct vec3d {
 
 	bool operator == (vec3d o){
 		return x == o.x && y == o.y && z == o.z;
+	}
+
+	vec3d normalized(){
+		fp i_d = fp_isqrt(x*x + y*y + z*z);
+		return (*this) * i_d;
 	}
 };
 
