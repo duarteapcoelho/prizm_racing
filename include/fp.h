@@ -6,37 +6,37 @@
 class fp {
 	public:
 	int i;
-	fp(int v){
+	inline fp(int v){
 		i = v * FP_RIGHT;
 	}
-	fp(float v){
+	inline fp(float v){
 		i = v * FP_RIGHT;
 	}
-	fp(double v){
+	inline fp(double v){
 		i = v * FP_RIGHT;
 	}
-	fp(){ i = 0; }
+	inline fp(){ i = 0; }
 
-	operator int() { return i / FP_RIGHT; }
-	operator float() { return ((float)i) / ((float)FP_RIGHT); }
+	inline operator int() { return i / FP_RIGHT; }
+	inline operator float() { return ((float)i) / ((float)FP_RIGHT); }
 
-	fp operator + (fp o){
+	inline fp operator + (fp o){
 		fp r;
 		r.i = i + o.i;
 		return r;
 	}
-	fp operator - (fp o){
+	inline fp operator - (fp o){
 		fp r;
 		r.i = i - o.i;
 		return r;
 	}
-	fp operator * (fp o){
+	inline fp operator * (fp o){
 		// printf("%d %d %d\n", i, o.i, INT_MAX);
 		fp r;
 		r.i = (i * o.i) / FP_RIGHT;
 		return r;
 	}
-	fp operator / (fp o){
+	inline fp operator / (fp o){
 		fp r;
 		r.i = i*FP_RIGHT / o.i;
 		return r;
@@ -59,27 +59,27 @@ class fp {
 	// 	return *this;
 	// }
 
-	bool operator > (fp o){ return i > o.i; }
-	bool operator < (fp o){ return i < o.i; }
-	bool operator > (int o){ return i > o*FP_RIGHT; }
-	bool operator < (int o){ return i < o*FP_RIGHT; }
-	bool operator > (float o){ return i > o*FP_RIGHT; }
-	bool operator < (float o){ return i < o*FP_RIGHT; }
-	bool operator > (double o){ return i > o*FP_RIGHT; }
-	bool operator < (double o){ return i < o*FP_RIGHT; }
-	bool operator >= (fp o){ return i >= o.i; }
-	bool operator <= (fp o){ return i <= o.i; }
-	bool operator >= (int o){ return i >= o*FP_RIGHT; }
-	bool operator <= (int o){ return i <= o*FP_RIGHT; }
-	bool operator >= (float o){ return i >= o*FP_RIGHT; }
-	bool operator <= (float o){ return i <= o*FP_RIGHT; }
-	bool operator >= (double o){ return i >= o*FP_RIGHT; }
-	bool operator <= (double o){ return i <= o*FP_RIGHT; }
+	inline bool operator > (fp o){ return i > o.i; }
+	inline bool operator < (fp o){ return i < o.i; }
+	inline bool operator > (int o){ return i > o*FP_RIGHT; }
+	inline bool operator < (int o){ return i < o*FP_RIGHT; }
+	inline bool operator > (float o){ return i > o*FP_RIGHT; }
+	inline bool operator < (float o){ return i < o*FP_RIGHT; }
+	inline bool operator > (double o){ return i > o*FP_RIGHT; }
+	inline bool operator < (double o){ return i < o*FP_RIGHT; }
+	inline bool operator >= (fp o){ return i >= o.i; }
+	inline bool operator <= (fp o){ return i <= o.i; }
+	inline bool operator >= (int o){ return i >= o*FP_RIGHT; }
+	inline bool operator <= (int o){ return i <= o*FP_RIGHT; }
+	inline bool operator >= (float o){ return i >= o*FP_RIGHT; }
+	inline bool operator <= (float o){ return i <= o*FP_RIGHT; }
+	inline bool operator >= (double o){ return i >= o*FP_RIGHT; }
+	inline bool operator <= (double o){ return i <= o*FP_RIGHT; }
 
-	bool operator == (fp o){ return i == o.i; }
-	bool operator == (int o){ return i == o*FP_RIGHT; }
-	bool operator == (float o){ return i == o*FP_RIGHT; }
-	bool operator == (double o){ return i == o*FP_RIGHT; }
+	inline bool operator == (fp o){ return i == o.i; }
+	inline bool operator == (int o){ return i == o*FP_RIGHT; }
+	inline bool operator == (float o){ return i == o*FP_RIGHT; }
+	inline bool operator == (double o){ return i == o*FP_RIGHT; }
 };
 
 // typedef float fp;

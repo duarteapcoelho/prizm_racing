@@ -12,30 +12,30 @@ struct vec3d {
 	fp x;
 	fp y;
 	fp z;
-	vec3d operator + (vec3d o){
+	inline vec3d operator + (vec3d o){
 		return {x + o.x, y + o.y, z + o.z};
 	}
-	vec3d operator - (vec3d o){
+	inline vec3d operator - (vec3d o){
 		return {x - o.x, y - o.y, z - o.z};
 	}
-	vec3d operator * (vec3d o){
+	inline vec3d operator * (vec3d o){
 		return {x * o.x, y * o.y, z * o.z};
 	}
-	vec3d operator / (vec3d o){
+	inline vec3d operator / (vec3d o){
 		return {x / o.x, y / o.y, z / o.z};
 	}
-	vec3d operator * (fp o){
+	inline vec3d operator * (fp o){
 		return {x * o, y * o, z * o};
 	}
-	vec3d operator / (fp o){
+	inline vec3d operator / (fp o){
 		return {x / o, y / o, z / o};
 	}
 
-	bool operator == (vec3d o){
+	inline bool operator == (vec3d o){
 		return x == o.x && y == o.y && z == o.z;
 	}
 
-	vec3d normalized(){
+	inline vec3d normalized(){
 		fp i_d = fp_isqrt(x*x + y*y + z*z);
 		return (*this) * i_d;
 	}
@@ -45,26 +45,26 @@ struct vec3f {
 	float x;
 	float y;
 	float z;
-	vec3f operator + (vec3f o){
+	inline vec3f operator + (vec3f o){
 		return {x + o.x, y + o.y, z + o.z};
 	}
-	vec3f operator - (vec3f o){
+	inline vec3f operator - (vec3f o){
 		return {x - o.x, y - o.y, z - o.z};
 	}
-	vec3f operator * (vec3f o){
+	inline vec3f operator * (vec3f o){
 		return {x * o.x, y * o.y, z * o.z};
 	}
-	vec3f operator / (vec3f o){
+	inline vec3f operator / (vec3f o){
 		return {x / o.x, y / o.y, z / o.z};
 	}
-	vec3f operator * (float o){
+	inline vec3f operator * (float o){
 		return {x * o, y * o, z * o};
 	}
-	vec3f operator / (float o){
+	inline vec3f operator / (float o){
 		return {x / o, y / o, z / o};
 	}
 
-	bool operator == (vec3f o){
+	inline bool operator == (vec3f o){
 		return x == o.x && y == o.y && z == o.z;
 	}
 };
