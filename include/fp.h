@@ -2,12 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define FP_RIGHT 1000
+#define FP_RIGHT 1024
+#define FP_RIGHT_BITS 10
 class fp {
 	public:
 	int i;
 	inline fp(int v){
-		i = v * FP_RIGHT;
+		i = v << FP_RIGHT_BITS;
 	}
 	inline fp(float v){
 		i = v * FP_RIGHT;
@@ -17,7 +18,7 @@ class fp {
 	}
 	inline fp(){ i = 0; }
 
-	inline operator int() { return i / FP_RIGHT; }
+	inline operator int() { return i >> FP_RIGHT_BITS; }
 	inline operator float() { return ((float)i) / ((float)FP_RIGHT); }
 
 	inline fp operator + (fp o){
@@ -33,12 +34,12 @@ class fp {
 	inline fp operator * (fp o){
 		// printf("%d %d %d\n", i, o.i, INT_MAX);
 		fp r;
-		r.i = (i * o.i) / FP_RIGHT;
+		r.i = (i * o.i) >> FP_RIGHT_BITS;
 		return r;
 	}
 	inline fp operator / (fp o){
 		fp r;
-		r.i = i*FP_RIGHT / o.i;
+		r.i = (i<<FP_RIGHT_BITS) / o.i;
 		return r;
 	}
 
@@ -61,23 +62,23 @@ class fp {
 
 	inline bool operator > (fp o){ return i > o.i; }
 	inline bool operator < (fp o){ return i < o.i; }
-	inline bool operator > (int o){ return i > o*FP_RIGHT; }
-	inline bool operator < (int o){ return i < o*FP_RIGHT; }
+	inline bool operator > (int o){ return i > (o<<FP_RIGHT_BITS); }
+	inline bool operator < (int o){ return i < (o<<FP_RIGHT_BITS); }
 	inline bool operator > (float o){ return i > o*FP_RIGHT; }
 	inline bool operator < (float o){ return i < o*FP_RIGHT; }
 	inline bool operator > (double o){ return i > o*FP_RIGHT; }
 	inline bool operator < (double o){ return i < o*FP_RIGHT; }
 	inline bool operator >= (fp o){ return i >= o.i; }
 	inline bool operator <= (fp o){ return i <= o.i; }
-	inline bool operator >= (int o){ return i >= o*FP_RIGHT; }
-	inline bool operator <= (int o){ return i <= o*FP_RIGHT; }
+	inline bool operator >= (int o){ return i >= (o<<FP_RIGHT_BITS); }
+	inline bool operator <= (int o){ return i <= (o<<FP_RIGHT_BITS); }
 	inline bool operator >= (float o){ return i >= o*FP_RIGHT; }
 	inline bool operator <= (float o){ return i <= o*FP_RIGHT; }
 	inline bool operator >= (double o){ return i >= o*FP_RIGHT; }
 	inline bool operator <= (double o){ return i <= o*FP_RIGHT; }
 
 	inline bool operator == (fp o){ return i == o.i; }
-	inline bool operator == (int o){ return i == o*FP_RIGHT; }
+	inline bool operator == (int o){ return i == (o<<FP_RIGHT_BITS); }
 	inline bool operator == (float o){ return i == o*FP_RIGHT; }
 	inline bool operator == (double o){ return i == o*FP_RIGHT; }
 };
