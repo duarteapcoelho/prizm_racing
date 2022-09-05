@@ -135,6 +135,13 @@ public:
 		};
 	}
 
+	static mat4 translate(mat4 matrix, vec3d p){
+		mat4 t;
+		t.m[3][0] = p.x;
+		t.m[3][1] = p.y;
+		t.m[3][2] = p.z;
+		return matrix * t;
+	}
 	static mat4 translate(mat4 matrix, fp x, fp y, fp z){
 		mat4 t;
 		t.m[3][0] = x;
