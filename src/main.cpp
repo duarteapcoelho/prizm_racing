@@ -1181,14 +1181,14 @@ int main(){
 		carModel.viewMatrix = view;
 
 		trackModel.viewMatrix = view;
-		trackModel.draw(false, false);
+		trackModel.draw(false, false, true);
 
 		for(int i = 0; i < NUM_TRACK_POINTS*2-2; i++){
 			coneModels[i].viewMatrix = view;
-			coneModels[i].draw(true, true);
+			coneModels[i].draw(true, true, false);
 		}
 
-		carModel.draw(true, true);
+		carModel.draw(true, true, false);
 
 		char buffer[10];
 #ifdef SDL

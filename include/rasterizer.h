@@ -38,7 +38,7 @@ public:
 	mat4 viewMatrix;
 	Model();
 	Model(Mesh mesh);
-	void draw(bool useDepth, bool isShaded);
+	void draw(bool useDepth, bool isShaded, bool clipTriangles);
 };
 
 namespace Rasterizer {
@@ -49,7 +49,5 @@ namespace Rasterizer {
 	vec3d toDevice(vec3d p);
 	vec3i toScreen(vec3d p);
 	void drawLine(vec3d p0, vec3d p1);
-	void drawTriangle(Model *model, Triangle triangle, Shader shader, bool useDepth, bool isShaded);
-	void drawModel(Model model, bool useDepth, bool isShaded);
-
+	void drawTriangle(Model *model, Triangle triangle, Shader shader, bool useDepth, bool isShaded, bool clipTriangles);
 };

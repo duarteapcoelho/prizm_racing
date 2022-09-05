@@ -338,7 +338,7 @@ namespace Rasterizer {
 		return m;
 	}
 
-	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded){
+	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded, bool clipTriangles){
 		triangle.p0 = model->viewMatrix * model->modelMatrix * triangle.p0;
 		triangle.p1 = model->viewMatrix * model->modelMatrix * triangle.p1;
 		triangle.p2 = model->viewMatrix * model->modelMatrix * triangle.p2;
@@ -359,7 +359,7 @@ namespace Rasterizer {
 
 		if(inside == 5){
 			_drawTriangle(model, triangle, useDepth, isShaded);
-		} else if(inside != 0){
+		} else if(inside != 0 && clipTriangles){
 			Mesh mesh = clipTriangle(triangle);
 			for(int i = 0; i < mesh.numTriangles; i++){
 				_drawTriangle(model, mesh.triangles[i], useDepth, isShaded);
@@ -376,8 +376,8 @@ Model::Model(){
 Model::Model(Mesh mesh){
 	this->mesh = mesh;
 }
-void Model::draw(bool useDepth, bool isShaded){
+void Model::draw(bool useDepth, bool isShaded, bool clipTriangles){
 	for(int i = 0; i < mesh.numTriangles; i++){
-		Rasterizer::drawTriangle(this, mesh.triangles[i], useDepth, isShaded);
+		Rasterizer::drawTriangle(this, mesh.triangles[i], useDepth, isShaded, clipTriangles);
 	}
 }
