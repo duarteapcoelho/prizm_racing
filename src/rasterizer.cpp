@@ -129,8 +129,24 @@ namespace Rasterizer {
 			newEdge(p2, p0),
 		};
 
+		edgeTable[0] = nullptr;
+		for(int i = 0; i < 3; i++){
+			if(edges[i] != nullptr){
+				if(edges[i]->minY < minY){
+					Edge **e = &(edgeTable[0]);
+					while(*e != nullptr){
+						e = &((*e)->next);
+					}
+					*e = edges[i];
+					(*e)->x = (*e)->x + fp(-(*e)->minY) * (*e)->m;
+				}
+			}
+		}
+
 		for(int y = minY; y < maxY; y++){
-			edgeTable[y] = nullptr;
+			if(y != 0)
+				edgeTable[y] = nullptr;
+			// edgeTable[y] = nullptr;
 			for(int i = 0; i < 3; i++){
 				if(edges[i] != nullptr){
 					if(edges[i]->minY == y){
@@ -170,7 +186,7 @@ namespace Rasterizer {
 			}
 
 			// draw
-			for(Edge *e = activeEdgeList; e != nullptr; e = e->next->next){
+			for(Edge *e = activeEdgeList; e != nullptr && e->next != nullptr; e = e->next->next){
 				int a = min(max(e->x, 0), RENDER_WIDTH);
 				int b = max(min(e->next->x, RENDER_WIDTH), 0);
 				int minX = min(a,b);
