@@ -68,8 +68,18 @@ fp fp_cos(fp x){
 	return fp_sin(x+fp(HALF_PI));
 }
 
+fp fp_tan(fp x){
+	return fp_sin(x) / fp_cos(x);
+}
+
+fp _fp_atan(fp x){
+	return fp(PI)/fp(4) * x - x * (fp_abs(x) - fp(1)) * (fp(0.245) + fp(0.066) * fp_abs(x));
+}
 fp fp_atan(fp x){
-	return fp(PI)*fp(4) * x - x * (fp_abs(x) - fp(1)) * (fp(0.245) + fp(0.066) * fp_abs(x));
+	if(x < 1)
+		return _fp_atan(x);
+	else
+		return fp(HALF_PI) - _fp_atan(fp(1)/x);
 }
 fp fp_atan2(fp y, fp x){
 	if(x == 0 || y == 0)

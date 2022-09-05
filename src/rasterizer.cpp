@@ -33,6 +33,8 @@ namespace Rasterizer {
 
 	fp *depthBuffer;
 
+	fp fov_d = 1;
+
 	void init(){
 		clippingPlanes[0] = {{0, 0, 1}, fp(0)-fp(NEAR_PLANE)}; // near
 		clippingPlanes[1] = {{fp(I_SQRT_2), 0, fp(I_SQRT_2)}, 0}; // left
@@ -47,10 +49,29 @@ namespace Rasterizer {
 		}
 	}
 
+	void setFOV(int fov){
+		fp half_fov_rad = fp(fov) * fp(PI) / fp(180) / fp(2);
+		fov_d = fp_tan(half_fov_rad) * fp(2);
+
+		half_fov_rad = half_fov_rad + fp(0.1);
+		fp a = fp_cos(half_fov_rad - fp(HALF_PI));
+		fp b = fp_sin(half_fov_rad - fp(HALF_PI));
+
+		half_fov_rad = fp_atan(fp_tan(half_fov_rad) * (fp(RENDER_HEIGHT)/fp(RENDER_WIDTH)));
+		fp c = fp_cos(half_fov_rad - fp(HALF_PI));
+		fp d = fp_sin(half_fov_rad - fp(HALF_PI));
+
+		clippingPlanes[0] = {{0, 0, 1}, fp(0)-fp(NEAR_PLANE)}; // near
+		clippingPlanes[1] = {{b, 0, a}, 0}; // left
+		clippingPlanes[2] = {{fp(0)-b, 0, a}, 0}; // right
+		clippingPlanes[3] = {{0, d, c}, 0}; // bottom
+		clippingPlanes[4] = {{0, fp(0)-d, c}, 0}; // top
+	}
+
 	inline vec3d toDevice(vec3d p){
 		return {
-			p.x / p.z,
-			p.y / p.z,
+			p.x / p.z / fov_d,
+			p.y / p.z / fov_d,
 			p.z
 		};
 	}

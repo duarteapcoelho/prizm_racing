@@ -25,6 +25,8 @@ fp _fp_sin(fp x);
 
 fp fp_sin(fp x);
 fp fp_cos(fp x);
+fp fp_tan(fp x);
+fp fp_atan(fp x);
 fp fp_atan2(fp y, fp x);
 
 float isqrt(float x);

@@ -1121,6 +1121,7 @@ int main(){
 	Model carModel = Model(carMesh);
 
 	Rasterizer::init();
+	Rasterizer::setFOV(70);
 	while(true){
 		Rasterizer::reset();
 
@@ -1150,6 +1151,8 @@ int main(){
 			wheelSpeed = 1;
 		if(wheelSpeed < 0)
 			wheelSpeed = 0;
+
+		Rasterizer::setFOV(70 + 100.0f / carSpeed.i_length());
 
 		carSpeed.x = carSpeed.x + wheelSpeed * float(fp_cos(fp(carAngle))) * Time::delta / 150.0f;
 		carSpeed.z = carSpeed.z + wheelSpeed * float(fp_sin(fp(0)-fp(carAngle))) * Time::delta / 150.0f;

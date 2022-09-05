@@ -46,6 +46,8 @@ namespace Rasterizer {
 	void reset();
 	extern fp *depthBuffer;
 
+	void setFOV(int fov);
+
 	vec3d toDevice(vec3d p);
 	vec3i toScreen(vec3d p);
 	void drawLine(vec3d p0, vec3d p1);
