@@ -866,65 +866,67 @@ int main(){
 	// 	treeTriangles
 	// };
 
-#define NUM_TRACK_POINTS 25
+#define NUM_TRACK_POINTS 29
 #define TRACK_WIDTH 10
-	vec3d trackPoints[NUM_TRACK_POINTS+1] = {
+	vec3f trackPoints[NUM_TRACK_POINTS+1] = {
 		{0, 0, 0},
 		{2, 0, 0},
-		{4, 0, 0},
+		{2+I_SQRT_2, 0, 1-I_SQRT_2},
+		{3, 0, 1},
+		{4-I_SQRT_2, 0, 1+I_SQRT_2},
+		{4, 0, 2},
+		{4+I_SQRT_2, 0, 1+I_SQRT_2},
+		{5, 0, 1},
+		{6-I_SQRT_2, 0, 1-I_SQRT_2},
 		{6, 0, 0},
-		{8, 0, 0},
-		{10, 0, 0},
-		{12, 0, 1},
-		{13, 0, 3},
-		{13, 0, 5},
-		{12, 0, 7},
-		{10, 0, 9},
-		{8, 0, 10},
-		{6, 0, 10},
-		{4, 0, 10},
-		{2, 0, 10},
-		{0, 0, 10},
-		{-2, 0, 10},
-		{-4, 0, 10},
-		{-6, 0, 10},
-		{-8, 0, 10},
-		{-10, 0, 10},
-		{-12, 0, 10},
-		{-14, 0, 10},
-		{-16, 0, 10},
-		{-18, 0, 10},
-		{-20, 0, 10},
+		{7, 0, 0},
+		{7+I_SQRT_2, 0, -1+I_SQRT_2},
+		{8, 0, -1},
+		{7+I_SQRT_2, 0, -1-I_SQRT_2},
+		{7, 0, -2},
+		{5, 0, -2},
+		{5-I_SQRT_2, 0, -3+I_SQRT_2},
+		{4, 0, -3},
+		{3+I_SQRT_2, 0, -3-I_SQRT_2},
+		{3, 0, -4},
+		{3-I_SQRT_2, 0, -3-I_SQRT_2},
+		{2, 0, -3},
+		{1+I_SQRT_2, 0, -3+I_SQRT_2},
+		{1, 0, -2},
+		{0, 0, -2},
+		{-I_SQRT_2, 0, -1-I_SQRT_2},
+		{-1, 0, -1},
+		{-I_SQRT_2, 0, -1+I_SQRT_2},
+		{0, 0, 0},
+		{2, 0, 0},
 	};
-	fp h = 0;
 	for(int i = 0; i < NUM_TRACK_POINTS+1; i++){
-		trackPoints[i] = trackPoints[i] * 5;
-		// trackPoints[i].y = trackPoints[i].y + fp_sin(h);
-		// h = h + fp(1);
+		trackPoints[i] = trackPoints[i] * 40;
+		trackPoints[i].y = 0;
 	}
 
 	Triangle trackTriangles[NUM_TRACK_POINTS*2-2];
 
 	for(int i = 0; i < NUM_TRACK_POINTS-1; i++){
-		vec3d pos = trackPoints[i];
-		vec3d direction = trackPoints[i+1] - pos;
-		vec3d nextDirection = trackPoints[i+2] - trackPoints[i+1];
-		vec3d perpendicular = {direction.z, direction.y, fp(0)-direction.x};
-		perpendicular = perpendicular.normalized() * fp(10);
-		vec3d nextPerpendicular = {nextDirection.z, nextDirection.y, fp(0)-nextDirection.x};
-		nextPerpendicular = nextPerpendicular.normalized() * fp(10);
+		vec3f pos = trackPoints[i];
+		vec3f direction = trackPoints[i+1] - trackPoints[i];
+		vec3f nextDirection = trackPoints[i+2] - trackPoints[i+1];
+		vec3f perpendicular = {direction.z, direction.y, -direction.x};
+		perpendicular = perpendicular * fp(TRACK_WIDTH) * perpendicular.i_length();
+		vec3f nextPerpendicular = {nextDirection.z, nextDirection.y, -nextDirection.x};
+		nextPerpendicular = nextPerpendicular * fp(TRACK_WIDTH) * nextPerpendicular.i_length();
 
 		trackTriangles[i] = {
-			pos - perpendicular,
-			pos + perpendicular,
-			pos - nextPerpendicular + direction,
+			vec3d(pos - perpendicular),
+			vec3d(pos + perpendicular),
+			vec3d(pos - nextPerpendicular + direction),
 			{0, -1, 0},
 			newColor(50, 50, 50)
 		};
 		trackTriangles[i+NUM_TRACK_POINTS-1] = {
-			pos + perpendicular,
-			pos - nextPerpendicular + direction,
-			pos + nextPerpendicular + direction,
+			vec3d(pos + perpendicular),
+			vec3d(pos - nextPerpendicular + direction),
+			vec3d(pos + nextPerpendicular + direction),
 			{0, -1, 0},
 			newColor(50, 50, 50)
 		};

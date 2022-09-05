@@ -34,7 +34,6 @@ namespace Rasterizer {
 	fp *depthBuffer;
 
 	void init(){
-#define I_SQRT_2 0.707106
 		clippingPlanes[0] = {{0, 0, 1}, fp(0)-fp(NEAR_PLANE)}; // near
 		clippingPlanes[1] = {{fp(I_SQRT_2), 0, fp(I_SQRT_2)}, 0}; // left
 		clippingPlanes[2] = {{fp(-I_SQRT_2), 0, fp(I_SQRT_2)}, 0}; // right

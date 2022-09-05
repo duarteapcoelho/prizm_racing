@@ -39,6 +39,9 @@ struct vec3d {
 		fp i_d = fp_isqrt(x*x + y*y + z*z);
 		return (*this) * i_d;
 	}
+	inline fp i_length(){
+		return fp_isqrt(x*x + y*y + z*z);
+	}
 };
 
 struct vec3f {
@@ -66,5 +69,15 @@ struct vec3f {
 
 	inline bool operator == (vec3f o){
 		return x == o.x && y == o.y && z == o.z;
+	}
+	inline operator vec3d(){
+		return {.x = x, .y = y, .z = z};
+	}
+	inline vec3f normalized(){
+		fp i_d = fp_isqrt(x*x + y*y + z*z);
+		return (*this) * i_d;
+	}
+	inline float i_length(){
+		return isqrt(x*x + y*y + z*z);
 	}
 };
