@@ -43,7 +43,7 @@ fp _fp_sin(fp x){
 
 void createSinTable(){
 	for(int i = 0; i < SIN_SAMPLES; i++){
-		sinTable[i] = _fp_sin(fp(i)*(fp(PI) / fp(SIN_SAMPLES)));
+		sinTable[i] = _float_sin(i * (PI / float(SIN_SAMPLES)));
 	}
 }
 
@@ -55,7 +55,7 @@ fp fp_sin(fp x){
 	}
 	if(x < 0)
 		return fp(0)-fp_sin(fp(0)-x);
-	int i = x/(fp(PI) / fp(SIN_SAMPLES));
+	int i = x * fp(SIN_SAMPLES / PI);
 	if(i >= SIN_SAMPLES)
 		i = SIN_SAMPLES-1;
 	fp r = sinTable[i];
