@@ -10,6 +10,7 @@
 mat4 view;
 vec3f carPos = {0, 0, 0};
 vec3f cameraPos = {0, 0, 0};
+vec3f cameraSpeed = {0, 0, 0};
 vec3f carSpeed = {0, 0, 0};
 float carDirection = 0;
 float carAngle = 0;
@@ -1732,21 +1733,24 @@ int main(){
 		if(wheelSpeed < 0)
 			wheelSpeed = 0;
 
-		Rasterizer::setFOV(70 + 100.0f / carSpeed.i_length());
+		Rasterizer::setFOV(fp(70 + 50.0f / carSpeed.i_length()));
 
 		carSpeed.x = carSpeed.x + wheelSpeed * float(fp_cos(fp(carAngle))) * Time::delta / 150.0f;
 		carSpeed.z = carSpeed.z + wheelSpeed * float(fp_sin(fp(0)-fp(carAngle))) * Time::delta / 150.0f;
-		carSpeed.x = carSpeed.x - (carSpeed.x * 0.01f) * Time::delta;
-		carSpeed.z = carSpeed.z - (carSpeed.z * 0.01f) * Time::delta;
+		carSpeed = carSpeed * (1.0f / (1.0f + (Time::delta * 0.01f)));
 
 		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * carDirection) * Time::delta;
 		carAngle = carAngle + (-carAngle * 0.05 + 0.05 * carDirection) * Time::delta;
-		// carAngle = carDirection;
 		carPos.x = carPos.x + carSpeed.x * Time::delta;
 		carPos.z = carPos.z + carSpeed.z * Time::delta;
-		// vec3f zero = {0,0,0};
-		// cameraPos = cameraPos + (zero - cameraPos * 0.2f + carPos * 0.2f) * Time::delta;
-		cameraPos = carPos;
+
+		vec3f lc = cameraPos;
+		vec3f ls = cameraSpeed;
+		cameraPos = smoothDamp(cameraPos, carPos, &cameraSpeed, 5.0f, Time::delta, 1000.0f);
+		if(cameraPos == carPos){
+			cameraPos = lc;
+			cameraSpeed = ls;
+		}
 
 		Display::clear(newColor(70, 180, 220));
 
