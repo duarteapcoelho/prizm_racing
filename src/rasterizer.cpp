@@ -198,10 +198,20 @@ namespace Rasterizer {
 
 			// draw
 			for(Edge *e = activeEdgeList; e != nullptr && e->next != nullptr; e = e->next->next){
-				int a = min(max(e->x, 0), RENDER_WIDTH);
-				int b = max(min(e->next->x, RENDER_WIDTH), 0);
-				int minX = min(a,b);
-				int maxX = max(a,b);
+				int a = e->x;
+				int b = e->next->x;
+				if(a < 0) a = 0;
+				else if(a > RENDER_WIDTH) a = RENDER_WIDTH;
+				if(b < 0) b = 0;
+				else if(b > RENDER_WIDTH) b = RENDER_WIDTH;
+				int minX, maxX;
+				if(a > b){
+					maxX = a;
+					minX = b;
+				} else {
+					maxX = b;
+					minX = a;
+				}
 				for(int x = minX; x < maxX; x++){
 					if(z < depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1 || !useDepth){
 						if(useDepth)
