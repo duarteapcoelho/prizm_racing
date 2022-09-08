@@ -91,11 +91,9 @@ namespace Rasterizer {
 		fp m;
 		Edge *next;
 	};
-	inline Edge *newEdge(vec3i p0, vec3i p1){
-		Edge *e = (Edge*) malloc(sizeof(Edge));
-
+	inline Edge newEdge(vec3i p0, vec3i p1){
 		if(p0.y > p1.y){
-			*e = {
+			return {
 				p1.y,
 				p0.y,
 				p1.x,
@@ -103,7 +101,7 @@ namespace Rasterizer {
 				nullptr
 			};
 		} else if(p0.y < p1.y){
-			*e = {
+			return {
 				p0.y,
 				p1.y,
 				p0.x,
@@ -111,11 +109,8 @@ namespace Rasterizer {
 				nullptr
 			};
 		} else {
-			free(e);
-			return nullptr;
+			return {p0.y, p1.y, p0.x, 0, nullptr};
 		}
-
-		return e;
 	}
 
 	inline void _drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded){
@@ -144,7 +139,7 @@ namespace Rasterizer {
 		}
 
 		Edge *edgeTable[RENDER_HEIGHT];
-		Edge *edges[3] = {
+		Edge edges[3] = {
 			newEdge(p0, p1),
 			newEdge(p1, p2),
 			newEdge(p2, p0),
@@ -152,31 +147,26 @@ namespace Rasterizer {
 
 		edgeTable[0] = nullptr;
 		for(int i = 0; i < 3; i++){
-			if(edges[i] != nullptr){
-				if(edges[i]->minY < minY){
-					Edge **e = &(edgeTable[0]);
-					while(*e != nullptr){
-						e = &((*e)->next);
-					}
-					*e = edges[i];
-					(*e)->x = (*e)->x + fp(-(*e)->minY) * (*e)->m;
+			if(edges[i].minY < minY){
+				Edge **e = &(edgeTable[0]);
+				while(*e != nullptr){
+					e = &((*e)->next);
 				}
+				*e = &edges[i];
+				(*e)->x = (*e)->x + fp(-(*e)->minY) * (*e)->m;
 			}
 		}
 
 		for(int y = minY; y < maxY; y++){
 			if(y != 0)
 				edgeTable[y] = nullptr;
-			// edgeTable[y] = nullptr;
 			for(int i = 0; i < 3; i++){
-				if(edges[i] != nullptr){
-					if(edges[i]->minY == y){
-						Edge **e = &(edgeTable[y]);
-						while(*e != nullptr){
-							e = &((*e)->next);
-						}
-						*e = edges[i];
+				if(edges[i].minY == y){
+					Edge **e = &(edgeTable[y]);
+					while(*e != nullptr){
+						e = &((*e)->next);
 					}
+					*e = &edges[i];
 				}
 			}
 		}
@@ -223,12 +213,6 @@ namespace Rasterizer {
 #endif
 					}
 				}
-			}
-		}
-
-		for(int i = 0; i < 3; i++){
-			if(edges[i] != nullptr){
-				free(edges[i]);
 			}
 		}
 	}
