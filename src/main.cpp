@@ -1582,6 +1582,25 @@ int main(){
 	// 	treeTriangles
 	// };
 
+	Triangle floorTriangles[2] = {
+		{
+			{-400, 0, -400},
+			{-400, 0, 400},
+			{400, 0, -400},
+			{0, -1, 0},
+			newColor(32, 79, 19)
+		},
+		{
+			{-400, 0, 400},
+			{400, 0, 400},
+			{400, 0, -400},
+			{0, -1, 0},
+			newColor(32, 79, 19)
+		},
+	};
+
+	Model floor({2, floorTriangles});
+
 #define NUM_TRACK_POINTS 29
 #define TRACK_WIDTH 10
 	vec3f trackPoints[NUM_TRACK_POINTS+1] = {
@@ -1722,6 +1741,9 @@ int main(){
 
 		carModel.modelMatrix = carMatrix;
 		carModel.viewMatrix = view;
+
+		floor.viewMatrix = view;
+		floor.draw(false, false, true);
 
 		trackModel.viewMatrix = view;
 		trackModel.draw(false, false, true);
