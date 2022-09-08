@@ -132,7 +132,7 @@ namespace Rasterizer {
 		fp z = (p0.z + p1.z + p2.z) / 3;
 
 		if(isShaded){
-			fp brightness = dot3(mat4::toMat3(model->modelMatrix) * triangle.normal, {-0.2, -0.6, 0.2}) + fp(0.2);
+			fp brightness = dot3(mat4::toMat3(model->modelMatrix) * triangle.normal, {I_SQRT_3, -I_SQRT_3, -I_SQRT_3}) * fp(0.6) + fp(0.4);
 			if(brightness > 1)
 				brightness = 1;
 			if(brightness < 0)

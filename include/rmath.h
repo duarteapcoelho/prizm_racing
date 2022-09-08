@@ -3,6 +3,7 @@
 #include "fp.h"
 
 #define I_SQRT_2 0.707106
+#define I_SQRT_3 0.577350
 #define PI 3.141592654
 #define HALF_PI 1.570796327
 

@@ -1623,6 +1623,25 @@ int main(){
 
 	Model floor({2, floorTriangles});
 
+	Triangle sunTriangles[2] = {
+		{
+			{-1, -1, 0},
+			{-1, 1, 0},
+			{1, -1, 0},
+			{0, 1, 0},
+			newColor(255, 255, 0)
+		},
+		{
+			{-1, 1, 0},
+			{1, 1, 0},
+			{1, -1, 0},
+			{0, 1, 0},
+			newColor(255, 255, 0)
+		},
+	};
+
+	Model sun({2, sunTriangles});
+
 #define NUM_TRACK_POINTS 29
 #define TRACK_WIDTH 10
 	vec3f trackPoints[NUM_TRACK_POINTS+1] = {
@@ -1766,6 +1785,13 @@ int main(){
 
 		carModel.modelMatrix = carMatrix;
 		carModel.viewMatrix = view;
+
+		sun.viewMatrix = view;
+		sun.modelMatrix = mat4();
+		sun.modelMatrix = mat4::translate(sun.modelMatrix, 20, -6, -20);
+		sun.modelMatrix = mat4::translate(sun.modelMatrix, cameraPos.x, 0, cameraPos.z);
+		sun.modelMatrix = mat4::rotateY(sun.modelMatrix, cameraAngle + HALF_PI);
+		sun.draw(false, false, true);
 
 		floor.viewMatrix = view;
 		floor.draw(false, false, true);
