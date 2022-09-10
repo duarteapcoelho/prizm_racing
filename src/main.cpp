@@ -17,6 +17,64 @@ float carAngle = 0;
 float cameraAngle = 0;
 float wheelSpeed = 0;
 
+#define NUM_TRACK_POINTS 29
+#define TRACK_WIDTH 10
+#define TRACK_INSIDE_TOLERANCE 1.2
+vec3f trackPoints[NUM_TRACK_POINTS+1] = {
+	{0, 0, 0},
+	{2, 0, 0},
+	{2+I_SQRT_2, 0, 1-I_SQRT_2},
+	{3, 0, 1},
+	{4-I_SQRT_2, 0, 1+I_SQRT_2},
+	{4, 0, 2},
+	{4+I_SQRT_2, 0, 1+I_SQRT_2},
+	{5, 0, 1},
+	{6-I_SQRT_2, 0, 1-I_SQRT_2},
+	{6, 0, 0},
+	{7, 0, 0},
+	{7+I_SQRT_2, 0, -1+I_SQRT_2},
+	{8, 0, -1},
+	{7+I_SQRT_2, 0, -1-I_SQRT_2},
+	{7, 0, -2},
+	{5, 0, -2},
+	{5-I_SQRT_2, 0, -3+I_SQRT_2},
+	{4, 0, -3},
+	{3+I_SQRT_2, 0, -3-I_SQRT_2},
+	{3, 0, -4},
+	{3-I_SQRT_2, 0, -3-I_SQRT_2},
+	{2, 0, -3},
+	{1+I_SQRT_2, 0, -3+I_SQRT_2},
+	{1, 0, -2},
+	{0, 0, -2},
+	{-I_SQRT_2, 0, -1-I_SQRT_2},
+	{-1, 0, -1},
+	{-I_SQRT_2, 0, -1+I_SQRT_2},
+	{0, 0, 0},
+	{2, 0, 0},
+};
+
+float distanceToLine2(vec3f p, vec3f p1, vec3f p2){
+	float l2 = (p1-p2).length2();
+
+	if(l2 == 0) return (p1 - p).length2();
+
+	float t = dot(p - p1, p2 - p1) / l2;
+	if(t < 0) t = 0;
+	if(t > 1) t = 1;
+	vec3f projection = p1 + (p2 - p1) * t;
+	return (p - projection).length2();
+}
+
+bool onTrack(vec3f p){
+	float minDistance2 = -1;
+	for(int i = 0; i < NUM_TRACK_POINTS; i++){
+		float d = distanceToLine2(p, trackPoints[i], trackPoints[i+1]);
+		if(d < minDistance2 || minDistance2 == -1)
+			minDistance2 = d;
+	}
+	return minDistance2 < TRACK_WIDTH*TRACK_WIDTH*TRACK_INSIDE_TOLERANCE*TRACK_INSIDE_TOLERANCE;
+}
+
 int main(){
 	fp st[SIN_SAMPLES];
 	sinTable = st;
@@ -1642,40 +1700,6 @@ int main(){
 
 	Model sun({2, sunTriangles});
 
-#define NUM_TRACK_POINTS 29
-#define TRACK_WIDTH 10
-	vec3f trackPoints[NUM_TRACK_POINTS+1] = {
-		{0, 0, 0},
-		{2, 0, 0},
-		{2+I_SQRT_2, 0, 1-I_SQRT_2},
-		{3, 0, 1},
-		{4-I_SQRT_2, 0, 1+I_SQRT_2},
-		{4, 0, 2},
-		{4+I_SQRT_2, 0, 1+I_SQRT_2},
-		{5, 0, 1},
-		{6-I_SQRT_2, 0, 1-I_SQRT_2},
-		{6, 0, 0},
-		{7, 0, 0},
-		{7+I_SQRT_2, 0, -1+I_SQRT_2},
-		{8, 0, -1},
-		{7+I_SQRT_2, 0, -1-I_SQRT_2},
-		{7, 0, -2},
-		{5, 0, -2},
-		{5-I_SQRT_2, 0, -3+I_SQRT_2},
-		{4, 0, -3},
-		{3+I_SQRT_2, 0, -3-I_SQRT_2},
-		{3, 0, -4},
-		{3-I_SQRT_2, 0, -3-I_SQRT_2},
-		{2, 0, -3},
-		{1+I_SQRT_2, 0, -3+I_SQRT_2},
-		{1, 0, -2},
-		{0, 0, -2},
-		{-I_SQRT_2, 0, -1-I_SQRT_2},
-		{-1, 0, -1},
-		{-I_SQRT_2, 0, -1+I_SQRT_2},
-		{0, 0, 0},
-		{2, 0, 0},
-	};
 	for(int i = 0; i < NUM_TRACK_POINTS+1; i++){
 		trackPoints[i] = trackPoints[i] * 40;
 		trackPoints[i].y = 0;
@@ -1740,13 +1764,17 @@ int main(){
 		}
 
 		if(Input::keyDown(KEY_UP) || Input::keyDown(KEY_8)){
-			wheelSpeed = wheelSpeed + Time::delta / 200.0f;
+			wheelSpeed = wheelSpeed + Time::delta / 500.0f;
 		}
 		if(Input::keyDown(KEY_DOWN) || Input::keyDown(KEY_5)){
 			wheelSpeed = wheelSpeed - Time::delta / 200.0f;
 		}
 
-		wheelSpeed = wheelSpeed - (wheelSpeed * 0.001f) * Time::delta;
+		bool isOnTrack = onTrack(carPos);
+
+		if(!isOnTrack)
+			wheelSpeed = wheelSpeed * (1.0f / (1.0f + (Time::delta * 0.002f)));
+
 		if(wheelSpeed > 1)
 			wheelSpeed = 1;
 		if(wheelSpeed < 0)
@@ -1756,7 +1784,10 @@ int main(){
 
 		carSpeed.x = carSpeed.x + wheelSpeed * float(fp_cos(fp(carAngle))) * Time::delta / 150.0f;
 		carSpeed.z = carSpeed.z + wheelSpeed * float(fp_sin(fp(0)-fp(carAngle))) * Time::delta / 150.0f;
-		carSpeed = carSpeed * (1.0f / (1.0f + (Time::delta * 0.01f)));
+		if(isOnTrack)
+			carSpeed = carSpeed * (1.0f / (1.0f + (Time::delta * 0.01f)));
+		else
+			carSpeed = carSpeed * (1.0f / (1.0f + (Time::delta * 0.02f)));
 
 		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * carDirection) * Time::delta;
 		carAngle = carAngle + (-carAngle * 0.05 + 0.05 * carDirection) * Time::delta;

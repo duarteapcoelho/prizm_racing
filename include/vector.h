@@ -42,6 +42,9 @@ struct vec3d {
 	inline fp i_length(){
 		return fp_isqrt(x*x + y*y + z*z);
 	}
+	inline fp length2(){
+		return x*x + y*y + z*z;
+	}
 };
 
 struct vec3f {
@@ -79,6 +82,9 @@ struct vec3f {
 	}
 	inline float i_length(){
 		return isqrt(x*x + y*y + z*z);
+	}
+	inline float length2(){
+		return x*x + y*y + z*z;
 	}
 };
 
