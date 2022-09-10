@@ -7,241 +7,20 @@
 #include "rmath.h"
 #include "math.h"
 
+#include "car.h"
+#include "track.h"
+
 mat4 view;
-vec3f carPos = {0, 0, 0};
 vec3f cameraPos = {0, 0, 0};
 vec3f cameraSpeed = {0, 0, 0};
-vec3f carSpeed = {0, 0, 0};
-float carDirection = 0;
-float carAngle = 0;
 float cameraAngle = 0;
-float wheelSpeed = 0;
-
-#define NUM_TRACK_POINTS 29
-#define TRACK_WIDTH 10
-#define TRACK_INSIDE_TOLERANCE 1.2
-vec3f trackPoints[NUM_TRACK_POINTS+1] = {
-	{0, 0, 0},
-	{2, 0, 0},
-	{2+I_SQRT_2, 0, 1-I_SQRT_2},
-	{3, 0, 1},
-	{4-I_SQRT_2, 0, 1+I_SQRT_2},
-	{4, 0, 2},
-	{4+I_SQRT_2, 0, 1+I_SQRT_2},
-	{5, 0, 1},
-	{6-I_SQRT_2, 0, 1-I_SQRT_2},
-	{6, 0, 0},
-	{7, 0, 0},
-	{7+I_SQRT_2, 0, -1+I_SQRT_2},
-	{8, 0, -1},
-	{7+I_SQRT_2, 0, -1-I_SQRT_2},
-	{7, 0, -2},
-	{5, 0, -2},
-	{5-I_SQRT_2, 0, -3+I_SQRT_2},
-	{4, 0, -3},
-	{3+I_SQRT_2, 0, -3-I_SQRT_2},
-	{3, 0, -4},
-	{3-I_SQRT_2, 0, -3-I_SQRT_2},
-	{2, 0, -3},
-	{1+I_SQRT_2, 0, -3+I_SQRT_2},
-	{1, 0, -2},
-	{0, 0, -2},
-	{-I_SQRT_2, 0, -1-I_SQRT_2},
-	{-1, 0, -1},
-	{-I_SQRT_2, 0, -1+I_SQRT_2},
-	{0, 0, 0},
-	{2, 0, 0},
-};
-
-float distanceToLine2(vec3f p, vec3f p1, vec3f p2){
-	float l2 = (p1-p2).length2();
-
-	if(l2 == 0) return (p1 - p).length2();
-
-	float t = dot(p - p1, p2 - p1) / l2;
-	if(t < 0) t = 0;
-	if(t > 1) t = 1;
-	vec3f projection = p1 + (p2 - p1) * t;
-	return (p - projection).length2();
-}
-
-bool onTrack(vec3f p){
-	float minDistance2 = -1;
-	for(int i = 0; i < NUM_TRACK_POINTS; i++){
-		float d = distanceToLine2(p, trackPoints[i], trackPoints[i+1]);
-		if(d < minDistance2 || minDistance2 == -1)
-			minDistance2 = d;
-	}
-	return minDistance2 < TRACK_WIDTH*TRACK_WIDTH*TRACK_INSIDE_TOLERANCE*TRACK_INSIDE_TOLERANCE;
-}
 
 int main(){
 	fp st[SIN_SAMPLES];
 	sinTable = st;
 	createSinTable();
 
-	Display::init();
-	Display::clear(newColor(0, 0, 0));
-	Display::show();
-
-	Time::update();
-
-	Input::init();
-
-	fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
-	Rasterizer::depthBuffer = depthBuffer;
-	Triangle coneTriangles[22] = {
-		{
-			{0.328, -0.679, 0.328},
-			{-0.328, -0.679, 0.328},
-			{0.000, -1.552, 0.000},
-			{-0.000, -0.352, 0.936},
-			newColor(255, 110, 0)},
-		{
-			{-0.328, -0.679, -0.328},
-			{0.328, -0.679, -0.328},
-			{0.000, -1.552, 0.000},
-			{0.000, -0.352, -0.936},
-			newColor(255, 110, 0)},
-		{
-			{-0.328, -0.679, 0.328},
-			{-0.328, -0.679, -0.328},
-			{0.000, -1.552, 0.000},
-			{-0.936, -0.352, 0.000},
-			newColor(255, 110, 0)},
-		{
-			{0.328, -0.679, -0.328},
-			{0.328, -0.679, 0.328},
-			{0.000, -1.552, 0.000},
-			{0.936, -0.352, -0.000},
-			newColor(255, 110, 0)},
-		{
-			{0.492, -0.243, 0.492},
-			{0.328, -0.679, -0.328},
-			{0.492, -0.243, -0.492},
-			{0.936, -0.352, -0.000},
-			newColor(255, 255, 255)},
-		{
-			{-0.492, -0.243, -0.492},
-			{-0.328, -0.679, 0.328},
-			{-0.492, -0.243, 0.492},
-			{-0.936, -0.352, 0.000},
-			newColor(255, 255, 255)},
-		{
-			{-0.492, -0.243, -0.492},
-			{0.328, -0.679, -0.328},
-			{-0.328, -0.679, -0.328},
-			{0.000, -0.352, -0.936},
-			newColor(255, 255, 255)},
-		{
-			{0.492, -0.243, 0.492},
-			{-0.328, -0.679, 0.328},
-			{0.328, -0.679, 0.328},
-			{-0.000, -0.352, 0.936},
-			newColor(255, 255, 255)},
-		{
-			{-0.656, 0.193, 0.656},
-			{0.492, -0.243, 0.492},
-			{0.656, 0.193, 0.656},
-			{0.000, -0.352, 0.936},
-			newColor(255, 110, 0)},
-		{
-			{0.656, 0.193, -0.656},
-			{-0.492, -0.243, -0.492},
-			{-0.656, 0.193, -0.656},
-			{0.000, -0.352, -0.936},
-			newColor(255, 110, 0)},
-		{
-			{-0.656, 0.193, -0.656},
-			{-0.492, -0.243, 0.492},
-			{-0.656, 0.193, 0.656},
-			{-0.936, -0.352, 0.000},
-			newColor(255, 110, 0)},
-		{
-			{0.656, 0.193, 0.656},
-			{0.492, -0.243, -0.492},
-			{0.656, 0.193, -0.656},
-			{0.936, -0.352, 0.000},
-			newColor(255, 110, 0)},
-		{
-			{1.000, 0.193, 1.000},
-			{1.000, 0.193, -1.000},
-			{-1.000, 0.193, -1.000},
-			{0.000, -1.000, 0.000},
-			newColor(255, 110, 0)},
-		{
-			{1.000, 0.193, 1.000},
-			{-1.000, 0.193, -1.000},
-			{-1.000, 0.193, 1.000},
-			{0.000, -1.000, 0.000},
-			newColor(255, 110, 0)},
-		{
-			{0.492, -0.243, 0.492},
-			{0.328, -0.679, 0.328},
-			{0.328, -0.679, -0.328},
-			{0.936, -0.352, -0.000},
-			newColor(255, 255, 255)},
-		{
-			{-0.492, -0.243, -0.492},
-			{-0.328, -0.679, -0.328},
-			{-0.328, -0.679, 0.328},
-			{-0.936, -0.352, 0.000},
-			newColor(255, 255, 255)},
-		{
-			{-0.492, -0.243, -0.492},
-			{0.492, -0.243, -0.492},
-			{0.328, -0.679, -0.328},
-			{0.000, -0.352, -0.936},
-			newColor(255, 255, 255)},
-		{
-			{0.492, -0.243, 0.492},
-			{-0.492, -0.243, 0.492},
-			{-0.328, -0.679, 0.328},
-			{-0.000, -0.352, 0.936},
-			newColor(255, 255, 255)},
-		{
-			{-0.656, 0.193, 0.656},
-			{-0.492, -0.243, 0.492},
-			{0.492, -0.243, 0.492},
-			{-0.000, -0.352, 0.936},
-			newColor(255, 110, 0)},
-		{
-			{0.656, 0.193, -0.656},
-			{0.492, -0.243, -0.492},
-			{-0.492, -0.243, -0.492},
-			{0.000, -0.352, -0.936},
-			newColor(255, 110, 0)},
-		{
-			{-0.656, 0.193, -0.656},
-			{-0.492, -0.243, -0.492},
-			{-0.492, -0.243, 0.492},
-			{-0.936, -0.352, 0.000},
-			newColor(255, 110, 0)},
-		{
-			{0.656, 0.193, 0.656},
-			{0.492, -0.243, 0.492},
-			{0.492, -0.243, -0.492},
-			{0.936, -0.352, -0.000},
-			newColor(255, 110, 0)},
-	};
-	Triangle coneSimpleTriangles[2] = {
-		{
-			{-1, 0, 0},
-			{1, 0, 0},
-			{0, -2, 0},
-			{0, -2, 0},
-			newColor(170, 80, 0)
-		},
-		{
-			{0, 0, -1},
-			{0, 0, 1},
-			{0, -2, 0},
-			{0, -2, 0},
-			newColor(170, 80, 0)
-		}
-	};
-
-	Triangle carTriangles[230] = {
+	Triangle carTriangles[] = {
 		{
 			{0.794, 0.294, -0.380},
 			{-0.535, 0.294, -0.443},
@@ -1623,44 +1402,173 @@ int main(){
 			{-0.009, -0.598, -0.801},
 			newColor(203, 2, 1)},
 	};
-
-	Mesh carMesh = {
-		230,
-		carTriangles
+	Triangle coneTriangles[] = {
+		{
+			{0.328, -0.679, 0.328},
+			{-0.328, -0.679, 0.328},
+			{0.000, -1.552, 0.000},
+			{-0.000, -0.352, 0.936},
+			newColor(255, 110, 0)},
+		{
+			{-0.328, -0.679, -0.328},
+			{0.328, -0.679, -0.328},
+			{0.000, -1.552, 0.000},
+			{0.000, -0.352, -0.936},
+			newColor(255, 110, 0)},
+		{
+			{-0.328, -0.679, 0.328},
+			{-0.328, -0.679, -0.328},
+			{0.000, -1.552, 0.000},
+			{-0.936, -0.352, 0.000},
+			newColor(255, 110, 0)},
+		{
+			{0.328, -0.679, -0.328},
+			{0.328, -0.679, 0.328},
+			{0.000, -1.552, 0.000},
+			{0.936, -0.352, -0.000},
+			newColor(255, 110, 0)},
+		{
+			{0.492, -0.243, 0.492},
+			{0.328, -0.679, -0.328},
+			{0.492, -0.243, -0.492},
+			{0.936, -0.352, -0.000},
+			newColor(255, 255, 255)},
+		{
+			{-0.492, -0.243, -0.492},
+			{-0.328, -0.679, 0.328},
+			{-0.492, -0.243, 0.492},
+			{-0.936, -0.352, 0.000},
+			newColor(255, 255, 255)},
+		{
+			{-0.492, -0.243, -0.492},
+			{0.328, -0.679, -0.328},
+			{-0.328, -0.679, -0.328},
+			{0.000, -0.352, -0.936},
+			newColor(255, 255, 255)},
+		{
+			{0.492, -0.243, 0.492},
+			{-0.328, -0.679, 0.328},
+			{0.328, -0.679, 0.328},
+			{-0.000, -0.352, 0.936},
+			newColor(255, 255, 255)},
+		{
+			{-0.656, 0.193, 0.656},
+			{0.492, -0.243, 0.492},
+			{0.656, 0.193, 0.656},
+			{0.000, -0.352, 0.936},
+			newColor(255, 110, 0)},
+		{
+			{0.656, 0.193, -0.656},
+			{-0.492, -0.243, -0.492},
+			{-0.656, 0.193, -0.656},
+			{0.000, -0.352, -0.936},
+			newColor(255, 110, 0)},
+		{
+			{-0.656, 0.193, -0.656},
+			{-0.492, -0.243, 0.492},
+			{-0.656, 0.193, 0.656},
+			{-0.936, -0.352, 0.000},
+			newColor(255, 110, 0)},
+		{
+			{0.656, 0.193, 0.656},
+			{0.492, -0.243, -0.492},
+			{0.656, 0.193, -0.656},
+			{0.936, -0.352, 0.000},
+			newColor(255, 110, 0)},
+		{
+			{1.000, 0.193, 1.000},
+			{1.000, 0.193, -1.000},
+			{-1.000, 0.193, -1.000},
+			{0.000, -1.000, 0.000},
+			newColor(255, 110, 0)},
+		{
+			{1.000, 0.193, 1.000},
+			{-1.000, 0.193, -1.000},
+			{-1.000, 0.193, 1.000},
+			{0.000, -1.000, 0.000},
+			newColor(255, 110, 0)},
+		{
+			{0.492, -0.243, 0.492},
+			{0.328, -0.679, 0.328},
+			{0.328, -0.679, -0.328},
+			{0.936, -0.352, -0.000},
+			newColor(255, 255, 255)},
+		{
+			{-0.492, -0.243, -0.492},
+			{-0.328, -0.679, -0.328},
+			{-0.328, -0.679, 0.328},
+			{-0.936, -0.352, 0.000},
+			newColor(255, 255, 255)},
+		{
+			{-0.492, -0.243, -0.492},
+			{0.492, -0.243, -0.492},
+			{0.328, -0.679, -0.328},
+			{0.000, -0.352, -0.936},
+			newColor(255, 255, 255)},
+		{
+			{0.492, -0.243, 0.492},
+			{-0.492, -0.243, 0.492},
+			{-0.328, -0.679, 0.328},
+			{-0.000, -0.352, 0.936},
+			newColor(255, 255, 255)},
+		{
+			{-0.656, 0.193, 0.656},
+			{-0.492, -0.243, 0.492},
+			{0.492, -0.243, 0.492},
+			{-0.000, -0.352, 0.936},
+			newColor(255, 110, 0)},
+		{
+			{0.656, 0.193, -0.656},
+			{0.492, -0.243, -0.492},
+			{-0.492, -0.243, -0.492},
+			{0.000, -0.352, -0.936},
+			newColor(255, 110, 0)},
+		{
+			{-0.656, 0.193, -0.656},
+			{-0.492, -0.243, -0.492},
+			{-0.492, -0.243, 0.492},
+			{-0.936, -0.352, 0.000},
+			newColor(255, 110, 0)},
+		{
+			{0.656, 0.193, 0.656},
+			{0.492, -0.243, 0.492},
+			{0.492, -0.243, -0.492},
+			{0.936, -0.352, -0.000},
+			newColor(255, 110, 0)},
+	};
+	Triangle simpleConeTriangles[] = {
+		{
+			{-1, 0, 0},
+			{1, 0, 0},
+			{0, -2, 0},
+			{0, -2, 0},
+			newColor(120, 50, 0)
+		},
+		{
+			{0, 0, -1},
+			{0, 0, 1},
+			{0, -2, 0},
+			{0, -2, 0},
+			newColor(120, 50, 0)
+		}
 	};
 
-	Mesh coneMesh = {
-		22,
-		coneTriangles
-	};
+	Car::model = Model({230, carTriangles});
+	Track::coneMesh = {22, coneTriangles};
+	Track::simpleConeMesh = {2, simpleConeTriangles};
 
-	Mesh coneSimpleMesh = {
-		2,
-		coneSimpleTriangles
-	};
+	Display::init();
+	Display::clear(newColor(0, 0, 0));
+	Display::show();
 
+	Time::update();
+
+	Input::init();
+
+	fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
+	Rasterizer::depthBuffer = depthBuffer;
 
 	srand(0);
-
-	// Triangle treeTriangles[10*10];
-	// for(int x = 0; x < 10; x++){
-	// 	for(int y = 0; y < 10; y++){
-	// 		// int treeX = (x-50)*10;
-	// 		// int treeY = (y-50)*10;
-	// 		int treeX = ((rand()%100) - 50)*10;
-	// 		int treeY = ((rand()%100) - 50)*10;
-	// 		treeTriangles[x+y*10] = {
-	// 			{treeX-1, 0, treeY},
-	// 			{treeX, -1, treeY},
-	// 			{treeX+1, 0, treeY},
-	// 			newColor(0, 255, 0)
-	// 		};
-	// 	}
-	// }
-	// Mesh treeMesh = {
-	// 	10*10,
-	// 	treeTriangles
-	// };
 
 	Triangle floorTriangles[2] = {
 		{
@@ -1700,52 +1608,47 @@ int main(){
 
 	Model sun({2, sunTriangles});
 
-	for(int i = 0; i < NUM_TRACK_POINTS+1; i++){
+	vec3f trackPoints[] = {
+		{0, 0, 0},
+		{2, 0, 0},
+		{2+I_SQRT_2, 0, 1-I_SQRT_2},
+		{3, 0, 1},
+		{4-I_SQRT_2, 0, 1+I_SQRT_2},
+		{4, 0, 2},
+		{4+I_SQRT_2, 0, 1+I_SQRT_2},
+		{5, 0, 1},
+		{6-I_SQRT_2, 0, 1-I_SQRT_2},
+		{6, 0, 0},
+		{7, 0, 0},
+		{7+I_SQRT_2, 0, -1+I_SQRT_2},
+		{8, 0, -1},
+		{7+I_SQRT_2, 0, -1-I_SQRT_2},
+		{7, 0, -2},
+		{5, 0, -2},
+		{5-I_SQRT_2, 0, -3+I_SQRT_2},
+		{4, 0, -3},
+		{3+I_SQRT_2, 0, -3-I_SQRT_2},
+		{3, 0, -4},
+		{3-I_SQRT_2, 0, -3-I_SQRT_2},
+		{2, 0, -3},
+		{1+I_SQRT_2, 0, -3+I_SQRT_2},
+		{1, 0, -2},
+		{0, 0, -2},
+		{-I_SQRT_2, 0, -1-I_SQRT_2},
+		{-1, 0, -1},
+		{-I_SQRT_2, 0, -1+I_SQRT_2},
+	};
+	for(int i = 0; i < 28; i++){
 		trackPoints[i] = trackPoints[i] * 40;
 		trackPoints[i].y = 0;
 	}
-
-	Triangle trackTriangles[NUM_TRACK_POINTS*2-2];
-	Model coneModels[NUM_TRACK_POINTS*2-2];
-
-	for(int i = 0; i < NUM_TRACK_POINTS-1; i++){
-		vec3f pos = trackPoints[i];
-		vec3f direction = trackPoints[i+1] - trackPoints[i];
-		vec3f nextDirection = trackPoints[i+2] - trackPoints[i+1];
-		vec3f perpendicular = {direction.z, direction.y, -direction.x};
-		perpendicular = perpendicular * fp(TRACK_WIDTH) * perpendicular.i_length();
-		vec3f nextPerpendicular = {nextDirection.z, nextDirection.y, -nextDirection.x};
-		nextPerpendicular = nextPerpendicular * fp(TRACK_WIDTH) * nextPerpendicular.i_length();
-
-		trackTriangles[i] = {
-			vec3d(pos - perpendicular),
-			vec3d(pos + perpendicular),
-			vec3d(pos - nextPerpendicular + direction),
-			{0, -1, 0},
-			newColor(50, 50, 50)
-		};
-		trackTriangles[i+NUM_TRACK_POINTS-1] = {
-			vec3d(pos + perpendicular),
-			vec3d(pos - nextPerpendicular + direction),
-			vec3d(pos + nextPerpendicular + direction),
-			{0, -1, 0},
-			newColor(50, 50, 50)
-		};
-
-		coneModels[i].mesh = coneMesh;
-		coneModels[i].modelMatrix = mat4::scale(mat4::translate(mat4(), vec3d(pos - perpendicular)), 1, 1, 1);
-		coneModels[i+NUM_TRACK_POINTS-1].mesh = coneMesh;
-		coneModels[i+NUM_TRACK_POINTS-1].modelMatrix = mat4::scale(mat4::translate(mat4(), vec3d(pos + perpendicular)), 1, 1, 1);
-	}
-
-	Model trackModel = Model({NUM_TRACK_POINTS*2-2, trackTriangles});
-
-	mat4 carMatrix;
-
-	Model carModel = Model(carMesh);
+	Track track = Track(28, trackPoints, 10, 1.2);
 
 	Rasterizer::init();
 	Rasterizer::setFOV(70);
+
+	Car car = Car();
+
 	while(true){
 		Rasterizer::reset();
 
@@ -1756,66 +1659,27 @@ int main(){
 			return 0;
 		}
 
-		if(Input::keyDown(KEY_RIGHT) || Input::keyDown(KEY_6)){
-			carDirection = carDirection + Time::delta / 40.0f;
-		}
-		if(Input::keyDown(KEY_LEFT) || Input::keyDown(KEY_4)){
-			carDirection = carDirection - Time::delta / 40.0f;
-		}
+		car.processInput();
+		car.update(track.isInside(car.position));
+		Rasterizer::setFOV(fp(70 + 50.0f / car.speed.i_length()));
 
-		if(Input::keyDown(KEY_UP) || Input::keyDown(KEY_8)){
-			wheelSpeed = wheelSpeed + Time::delta / 500.0f;
-		}
-		if(Input::keyDown(KEY_DOWN) || Input::keyDown(KEY_5)){
-			wheelSpeed = wheelSpeed - Time::delta / 200.0f;
-		}
-
-		bool isOnTrack = onTrack(carPos);
-
-		if(!isOnTrack)
-			wheelSpeed = wheelSpeed * (1.0f / (1.0f + (Time::delta * 0.002f)));
-
-		if(wheelSpeed > 1)
-			wheelSpeed = 1;
-		if(wheelSpeed < 0)
-			wheelSpeed = 0;
-
-		Rasterizer::setFOV(fp(70 + 50.0f / carSpeed.i_length()));
-
-		carSpeed.x = carSpeed.x + wheelSpeed * float(fp_cos(fp(carAngle))) * Time::delta / 150.0f;
-		carSpeed.z = carSpeed.z + wheelSpeed * float(fp_sin(fp(0)-fp(carAngle))) * Time::delta / 150.0f;
-		if(isOnTrack)
-			carSpeed = carSpeed * (1.0f / (1.0f + (Time::delta * 0.01f)));
-		else
-			carSpeed = carSpeed * (1.0f / (1.0f + (Time::delta * 0.02f)));
-
-		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * carDirection) * Time::delta;
-		carAngle = carAngle + (-carAngle * 0.05 + 0.05 * carDirection) * Time::delta;
-		carPos.x = carPos.x + carSpeed.x * Time::delta;
-		carPos.z = carPos.z + carSpeed.z * Time::delta;
+		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * car.direction) * Time::delta;
 
 		vec3f lc = cameraPos;
 		vec3f ls = cameraSpeed;
-		cameraPos = smoothDamp(cameraPos, carPos, &cameraSpeed, 5.0f, Time::delta, 1000.0f);
-		if(cameraPos == carPos){
+		cameraPos = smoothDamp(cameraPos, car.position, &cameraSpeed, 5.0f, Time::delta, 1000.0f);
+		if(cameraPos == car.position){
 			cameraPos = lc;
 			cameraSpeed = ls;
 		}
 
 		Display::clear(newColor(70, 180, 220));
 
-		carMatrix = mat4();
-		carMatrix = mat4::translate(carMatrix, carPos.x, -0.5, carPos.z);
-		carMatrix = mat4::rotateY(carMatrix, carAngle);
-
 		view = mat4();
 		view = mat4::rotateX(view, HALF_PI*0.1);
 		view = mat4::translate(view, 0, 2, 6);
 		view = mat4::rotateY(view, -cameraAngle - HALF_PI);
 		view = mat4::translate(view, -cameraPos.x, 0, -cameraPos.z);
-
-		carModel.modelMatrix = carMatrix;
-		carModel.viewMatrix = view;
 
 		sun.viewMatrix = view;
 		sun.modelMatrix = mat4();
@@ -1827,24 +1691,9 @@ int main(){
 		floor.viewMatrix = view;
 		floor.draw(false, false, true);
 
-		trackModel.viewMatrix = view;
-		trackModel.draw(false, false, true);
+		track.render(view, car.position);
 
-		for(int i = 0; i < NUM_TRACK_POINTS*2-2; i += 2){
-			coneModels[i].viewMatrix = view;
-
-			float d = (trackPoints[i % (NUM_TRACK_POINTS-1)] - carPos).i_length();
-			if(d < 0.005){
-			}else if(d < 0.007){
-				coneModels[i].mesh = coneSimpleMesh;
-				coneModels[i].draw(true, false, false);
-			} else {
-				coneModels[i].mesh = coneMesh;
-				coneModels[i].draw(true, true, false);
-			}
-		}
-
-		carModel.draw(true, true, false);
+		car.render(view);
 
 		char buffer[10];
 #ifdef SDL
