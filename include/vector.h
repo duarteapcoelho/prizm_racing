@@ -118,3 +118,19 @@ inline vec3f smoothDamp(vec3f current, vec3f target, vec3f *currentVelocity, flo
 	}
 	return output;
 }
+
+inline fp dot(vec3d a, vec3d b){
+	return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
+inline fp cross(vec3d a, vec3d b){
+	return (a.x*b.y) - (a.y*b.x);
+}
+
+inline float dot(vec3f a, vec3f b){
+	return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
+inline float cross(vec3f a, vec3f b){
+	return (a.x*b.y) - (a.y*b.x);
+}
