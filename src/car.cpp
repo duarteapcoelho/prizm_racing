@@ -28,7 +28,9 @@ void Car::processInput(){
 }
 
 void Car::update(bool isOnTrack){
-	if(!isOnTrack)
+	if(isOnTrack)
+		wheelSpeed = wheelSpeed * (1.0f / (1.0f + (Time::delta * 0.001f)));
+	else
 		wheelSpeed = wheelSpeed * (1.0f / (1.0f + (Time::delta * 0.002f)));
 	speed.x = speed.x + wheelSpeed * float(fp_cos(fp(direction))) * Time::delta / 150.0f;
 	speed.z = speed.z + wheelSpeed * float(fp_sin(fp(-direction))) * Time::delta / 150.0f;
