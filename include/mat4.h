@@ -12,7 +12,7 @@ public:
 		m[0][1] = fp(0);
 		m[0][2] = fp(0);
 		m[0][3] = fp(0);
-		
+
 		m[1][0] = fp(0);
 		m[1][1] = fp(1);
 		m[1][2] = fp(0);
@@ -127,7 +127,7 @@ public:
 		return r;
 	}
 
-	vec3d operator * (vec3d o){
+	vec3<fp> operator * (vec3<fp> o){
 		return {
 			m[0][0] * o.x + m[1][0] * o.y + m[2][0] * o.z + m[3][0],
 			m[0][1] * o.x + m[1][1] * o.y + m[2][1] * o.z + m[3][1],
@@ -135,7 +135,7 @@ public:
 		};
 	}
 
-	static mat4 translate(mat4 matrix, vec3d p){
+	static mat4 translate(mat4 matrix, vec3<fp> p){
 		mat4 t;
 		t.m[3][0] = p.x;
 		t.m[3][1] = p.y;

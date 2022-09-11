@@ -13,22 +13,16 @@
 #define RENDER_HEIGHT (DISPLAY_HEIGHT/PIXEL_SIZE)
 
 struct Triangle {
-	vec3d p0;
-	vec3d p1;
-	vec3d p2;
-	vec3d normal;
+	vec3<fp> p0;
+	vec3<fp> p1;
+	vec3<fp> p2;
+	vec3<fp> normal;
 	Color c;
 };
 
 struct Mesh {
 	int numTriangles;
 	Triangle *triangles;
-};
-
-struct Shader {
-	vec3d (*vertexShader)(vec3d, void*);
-	Color (*fragmentShader)(Color, void*);
-	void *uniforms;
 };
 
 class Model {
@@ -48,8 +42,7 @@ namespace Rasterizer {
 
 	void setFOV(int fov);
 
-	vec3d toDevice(vec3d p);
-	vec3i toScreen(vec3d p);
-	void drawLine(vec3d p0, vec3d p1);
-	void drawTriangle(Model *model, Triangle triangle, Shader shader, bool useDepth, bool isShaded, bool clipTriangles);
+	vec3<fp> toDevice(vec3<fp> p);
+	vec3<int> toScreen(vec3<fp> p);
+	void drawLine(vec3<fp> p0, vec3<fp> p1);
 };

@@ -30,5 +30,9 @@ fp fp_tan(fp x);
 fp fp_atan(fp x);
 fp fp_atan2(fp y, fp x);
 
-float isqrt(float x);
-fp fp_isqrt(fp x);
+float _isqrt(float x);
+
+template <typename T>
+T isqrt(T x){
+	return T(_isqrt(float(x)));
+}

@@ -115,15 +115,11 @@ fp fp_atan2(fp y, fp x){
 	}
 }
 
-float isqrt(float x){
+float _isqrt(float x){
 	float xhalf = 0.5f * x;
 	int i = *(int*)&x;            // store floating-point bits in integer
 	i = 0x5f3759df - (i >> 1);    // initial guess for Newton's method
 	x = *(float*)&i;              // convert new bits into float
 	x = x*(1.5f - xhalf*x*x);     // One round of Newton's method
 	return x;
-}
-
-fp fp_isqrt(fp x){
-	return fp(isqrt(float(x)));
 }

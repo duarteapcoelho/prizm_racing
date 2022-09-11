@@ -4,7 +4,7 @@
 #include "time.h"
 
 struct Plane {
-	vec3d n;
+	vec3<fp> n;
 	fp d;
 };
 
@@ -60,7 +60,7 @@ namespace Rasterizer {
 		clippingPlanes[4] = {{0, fp(0)-d, c}, 0}; // top
 	}
 
-	inline vec3d toDevice(vec3d p){
+	inline vec3<fp> toDevice(vec3<fp> p){
 		return {
 			p.x / p.z / fov_d,
 			p.y / p.z / fov_d,
@@ -68,7 +68,7 @@ namespace Rasterizer {
 		};
 	}
 
-	inline vec3i toScreen(vec3d p){
+	inline vec3<int> toScreen(vec3<fp> p){
 		return {
 			p.x * fp(RENDER_WIDTH) + fp(RENDER_WIDTH / 2.0f),
 			p.y * fp(RENDER_WIDTH) + fp(RENDER_HEIGHT / 2.0f),
@@ -83,7 +83,7 @@ namespace Rasterizer {
 		fp m;
 		Edge *next;
 	};
-	inline Edge newEdge(vec3i p0, vec3i p1){
+	inline Edge newEdge(vec3<int> p0, vec3<int> p1){
 		if(p0.y > p1.y){
 			return {
 				p1.y,
@@ -106,20 +106,20 @@ namespace Rasterizer {
 	}
 
 	inline void _drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded){
-		vec3d p0_d = toDevice(triangle.p0);
-		vec3d p1_d = toDevice(triangle.p1);
-		vec3d p2_d = toDevice(triangle.p2);
+		vec3<fp> p0_d = toDevice(triangle.p0);
+		vec3<fp> p1_d = toDevice(triangle.p1);
+		vec3<fp> p2_d = toDevice(triangle.p2);
 
-		vec3i p0 = toScreen(p0_d);
-		vec3i p1 = toScreen(p1_d);
-		vec3i p2 = toScreen(p2_d);
+		vec3<int> p0 = toScreen(p0_d);
+		vec3<int> p1 = toScreen(p1_d);
+		vec3<int> p2 = toScreen(p2_d);
 
 		int minY = max(min(min(p0.y, p1.y), p2.y), 0);
 		int maxY = min(max(max(p0.y, p1.y), p2.y), RENDER_HEIGHT);
 		fp z = (p0.z + p1.z + p2.z) / 3;
 
 		if(isShaded){
-			fp brightness = dot(mat4::toMat3(model->modelMatrix) * triangle.normal, {I_SQRT_3, -I_SQRT_3, -I_SQRT_3}) * fp(0.6) + fp(0.4);
+			fp brightness = dot(mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(I_SQRT_3, -I_SQRT_3, -I_SQRT_3)) * fp(0.6) + fp(0.4);
 			if(brightness > 1)
 				brightness = 1;
 			if(brightness < 0)
@@ -245,8 +245,8 @@ namespace Rasterizer {
 		} else if(numClipped == 3){
 			return {0, nullptr};
 		} else if(numClipped == 2){
-			vec3d clipped[2];
-			vec3d notClipped;
+			vec3<fp> clipped[2];
+			vec3<fp> notClipped;
 			if(!clippedP0){
 				notClipped = triangle.p0;
 				clipped[0] = triangle.p1;
@@ -266,15 +266,15 @@ namespace Rasterizer {
 			if(d0 == 0 || d1 == 0)
 				return {0, nullptr};
 
-			vec3d B = notClipped + (clipped[0] - notClipped) * ((fp(0) - plane.d - dot(plane.n, notClipped))/d0);
-			vec3d C = notClipped + (clipped[1] - notClipped) * ((fp(0) - plane.d - dot(plane.n, notClipped))/d1);
+			vec3<fp> B = notClipped + (clipped[0] - notClipped) * ((fp(0) - plane.d - dot(plane.n, notClipped))/d0);
+			vec3<fp> C = notClipped + (clipped[1] - notClipped) * ((fp(0) - plane.d - dot(plane.n, notClipped))/d1);
 
 			Mesh m = {1, (Triangle*)malloc(sizeof(Triangle))};
 			m.triangles[0] = {notClipped, B, C, triangle.normal, triangle.c};
 			return m;
 		} else if(numClipped == 1){
-			vec3d clipped;
-			vec3d notClipped[2];
+			vec3<fp> clipped;
+			vec3<fp> notClipped[2];
 			if(clippedP0){
 				clipped = triangle.p0;
 				notClipped[0] = triangle.p1;
@@ -298,8 +298,8 @@ namespace Rasterizer {
 			if(d0 == 0 || d1 == 0)
 				return {0, nullptr};
 
-			vec3d A = notClipped[0] + (clipped - notClipped[0]) * ((fp(0) - plane.d - dot(plane.n, notClipped[0]))/d0);
-			vec3d B = notClipped[1] + (clipped - notClipped[1]) * ((fp(0) - plane.d - dot(plane.n, notClipped[1]))/d1);
+			vec3<fp> A = notClipped[0] + (clipped - notClipped[0]) * ((fp(0) - plane.d - dot(plane.n, notClipped[0]))/d0);
+			vec3<fp> B = notClipped[1] + (clipped - notClipped[1]) * ((fp(0) - plane.d - dot(plane.n, notClipped[1]))/d1);
 
 			Mesh m = {2, (Triangle*)malloc(2*sizeof(Triangle))};
 			m.triangles[0] = {notClipped[0], A, notClipped[1], triangle.normal, triangle.c};

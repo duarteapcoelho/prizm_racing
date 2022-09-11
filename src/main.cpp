@@ -11,8 +11,8 @@
 #include "track.h"
 
 mat4 view;
-vec3f cameraPos = {0, 0, 0};
-vec3f cameraSpeed = {0, 0, 0};
+vec3<float> cameraPos = {0, 0, 0};
+vec3<float> cameraSpeed = {0, 0, 0};
 float cameraAngle = 0;
 
 int main(){
@@ -1608,7 +1608,7 @@ int main(){
 
 	Model sun({2, sunTriangles});
 
-	vec3f trackPoints[] = {
+	vec3<float> trackPoints[] = {
 		{0, 0, 0},
 		{2, 0, 0},
 		{2+I_SQRT_2, 0, 1-I_SQRT_2},
@@ -1665,8 +1665,8 @@ int main(){
 
 		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * car.direction) * Time::delta;
 
-		vec3f lc = cameraPos;
-		vec3f ls = cameraSpeed;
+		vec3<float> lc = cameraPos;
+		vec3<float> ls = cameraSpeed;
 		cameraPos = smoothDamp(cameraPos, car.position, &cameraSpeed, 5.0f, Time::delta, 1000.0f);
 		if(cameraPos == car.position){
 			cameraPos = lc;

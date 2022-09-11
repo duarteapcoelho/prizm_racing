@@ -1,6 +1,6 @@
 #include "track.h"
 
-Track::Track(int numPoints, vec3f *points, float width, float tolerance){
+Track::Track(int numPoints, vec3<float> *points, float width, float tolerance){
 	this->numPoints = numPoints;
 	this->points = points;
 	this->width = width;
@@ -10,25 +10,25 @@ Track::Track(int numPoints, vec3f *points, float width, float tolerance){
 	cones = (Model*)malloc(numPoints*2 * sizeof(Model));
 
 	for(int i = 0; i < numPoints; i++){
-		vec3f pos = points[i];
-		vec3f direction = points[(i+1)%numPoints] - points[i];
-		vec3f nextDirection = points[(i+2)%numPoints] - points[(i+1)%numPoints];
-		vec3f perpendicular = {direction.z, direction.y, -direction.x};
+		vec3<float> pos = points[i];
+		vec3<float> direction = points[(i+1)%numPoints] - points[i];
+		vec3<float> nextDirection = points[(i+2)%numPoints] - points[(i+1)%numPoints];
+		vec3<float> perpendicular = {direction.z, direction.y, -direction.x};
 		perpendicular = perpendicular * width * perpendicular.i_length();
-		vec3f nextPerpendicular = {nextDirection.z, nextDirection.y, -nextDirection.x};
+		vec3<float> nextPerpendicular = {nextDirection.z, nextDirection.y, -nextDirection.x};
 		nextPerpendicular = nextPerpendicular * width * nextPerpendicular.i_length();
 
 		triangles[i*2] = {
-			vec3d(pos - perpendicular),
-			vec3d(pos + perpendicular),
-			vec3d(pos - nextPerpendicular + direction),
+			vec3<fp>(pos - perpendicular),
+			vec3<fp>(pos + perpendicular),
+			vec3<fp>(pos - nextPerpendicular + direction),
 			{0, -1, 0},
 			newColor(50, 50, 50)
 		};
 		triangles[i*2+1] = {
-			vec3d(pos + perpendicular),
-			vec3d(pos - nextPerpendicular + direction),
-			vec3d(pos + nextPerpendicular + direction),
+			vec3<fp>(pos + perpendicular),
+			vec3<fp>(pos - nextPerpendicular + direction),
+			vec3<fp>(pos + nextPerpendicular + direction),
 			{0, -1, 0},
 			newColor(50, 50, 50)
 		};
@@ -41,7 +41,7 @@ Track::Track(int numPoints, vec3f *points, float width, float tolerance){
 	model = Model({numPoints * 2, triangles});
 }
 
-void Track::render(mat4 viewMatrix, vec3f carPos){
+void Track::render(mat4 viewMatrix, vec3<float> carPos){
 	model.viewMatrix = viewMatrix;
 	model.draw(false, false, true);
 
@@ -63,7 +63,7 @@ void Track::render(mat4 viewMatrix, vec3f carPos){
 	}
 }
 
-float distanceToLine2(vec3f p, vec3f p1, vec3f p2){
+float distanceToLine2(vec3<float> p, vec3<float> p1, vec3<float> p2){
 	float l2 = (p1-p2).length2();
 
 	if(l2 == 0) return (p1 - p).length2();
@@ -71,11 +71,11 @@ float distanceToLine2(vec3f p, vec3f p1, vec3f p2){
 	float t = dot(p - p1, p2 - p1) / l2;
 	if(t < 0) t = 0;
 	if(t > 1) t = 1;
-	vec3f projection = p1 + (p2 - p1) * t;
+	vec3<float> projection = p1 + (p2 - p1) * t;
 	return (p - projection).length2();
 }
 
-bool Track::isInside(vec3f p){
+bool Track::isInside(vec3<float> p){
 	float minDistance2 = -1;
 	for(int i = 0; i < numPoints; i++){
 		float d = distanceToLine2(p, points[i], points[(i+1)%numPoints]);
