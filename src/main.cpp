@@ -1642,7 +1642,7 @@ int main(){
 		trackPoints[i] = trackPoints[i] * 40;
 		trackPoints[i].y = 0;
 	}
-	Track track = Track(28, trackPoints, 10, 1.2);
+	Track track = Track(28, trackPoints, 10, 1.0);
 
 	Rasterizer::init();
 	Rasterizer::setFOV(70);
