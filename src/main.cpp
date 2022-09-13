@@ -10,6 +10,11 @@
 #include "car.h"
 #include "track.h"
 
+#ifdef PRIZM
+#include <fxcg/system.h>
+int timer;
+#endif
+
 mat4 view;
 vec3<float> cameraPos = {0, 0, 0};
 vec3<float> cameraSpeed = {0, 0, 0};
@@ -1656,7 +1661,25 @@ int main(){
 		Input::update();
 
 		if(Input::keyPressed(KEY_MENU)){
+#ifdef PRIZM
+			while(Input::keyDown(KEY_MENU))
+				Input::update();
+			timer = Timer_Install(0, []() {
+					Keyboard_PutKeycode(4, 9, 0);
+					Timer_Stop(timer);
+					Timer_Deinstall(timer);
+					}, 1);
+			Timer_Start(timer);
+			int k = 0;
+			Bdisp_EnableColor(1);
+			GetKey(&k);
+
+			Time::update();
+			continue;
+#endif
+#ifdef SDL
 			return 0;
+#endif
 		}
 
 		car.processInput();
