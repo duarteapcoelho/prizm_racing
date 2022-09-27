@@ -12,6 +12,7 @@
 
 #ifdef PRIZM
 #include <fxcg/system.h>
+#include <fxcg/serial.h>
 int timer;
 #endif
 
@@ -1653,12 +1654,54 @@ int main(){
 	Rasterizer::setFOV(70);
 
 	Car car = Car();
+	Car enemyCar = Car();
+	enemyCar.position = {-1000, 0, 0};
+
+#ifdef PRIZM
+	while(Serial_IsOpen() != 1){
+		unsigned char mode[6] = {0, 5, 0, 0, 0, 0}; // 9600 bps 8n1
+		Serial_Open(mode);
+	}
+	Serial_ClearTX();
+	Serial_ClearRX();
+#endif
 
 	while(true){
 		Rasterizer::reset();
 
 		Time::update();
 		Input::update();
+
+#ifdef PRIZM
+		// The first 4 bits of a sent byte are 0b0001 if it's the first being sent and 0b0000 otherwise.
+		// The last 4 bits contain data. Each sent byte contains half a byte of data.
+
+		while(Serial_PollRX() > 0){
+			unsigned char o;
+			Serial_Peek(0, &o);
+			if(!(o & (1 << 4))){
+				Serial_ReadSingle(NULL);
+			} else {
+				if(Serial_PollRX() >= sizeof(Car)*2){
+					unsigned char enemyCarData[sizeof(Car)*2];
+					Serial_Read(enemyCarData, sizeof(Car)*2, NULL);
+					for(int i = 0; i < sizeof(Car); i++){
+						*(((unsigned char*)&enemyCar) + i) = ((enemyCarData[i*2] & 0x0F) << 4) | (enemyCarData[i*2+1] & 0x0F);
+					}
+				}
+				break;
+			}
+		}
+
+		while(Serial_PollTX() < sizeof(Car)*2);
+		unsigned char carData[sizeof(Car)*2];
+		for(int i = 0; i < sizeof(Car); i++){
+			carData[i*2] = ((*(((unsigned char*)&car) + i)) & 0xF0) >> 4;
+			carData[i*2+1] = ((*(((unsigned char*)&car) + i)) & 0x0F);
+		}
+		carData[0] = carData[0] | (1 << 4);
+		Serial_Write(carData, sizeof(Car)*2);
+#endif
 
 		if(Input::keyPressed(KEY_MENU)){
 #ifdef PRIZM
@@ -1684,6 +1727,7 @@ int main(){
 
 		car.processInput();
 		car.update(track.isInside(car.position));
+
 		Rasterizer::setFOV(fp(70 + 50.0f / car.speed.i_length()));
 
 		cameraAngle = cameraAngle + (-cameraAngle * 0.02 + 0.02 * car.direction) * Time::delta;
@@ -1716,6 +1760,7 @@ int main(){
 
 		track.render(view, car.position);
 
+		enemyCar.render(view);
 		car.render(view);
 
 		char buffer[10];
