@@ -8,10 +8,10 @@ Car::Car(){
 
 void Car::processInput(){
 	if(Input::keyDown(KEY_RIGHT) || Input::keyDown(KEY_6)){
-		targetDirection = targetDirection + Time::delta / 40.0f;
+		targetDirection = targetDirection + Time::delta / 80.0f;
 	}
 	if(Input::keyDown(KEY_LEFT) || Input::keyDown(KEY_4)){
-		targetDirection = targetDirection - Time::delta / 40.0f;
+		targetDirection = targetDirection - Time::delta / 80.0f;
 	}
 
 	if(Input::keyDown(KEY_UP) || Input::keyDown(KEY_8)){
@@ -32,8 +32,8 @@ void Car::update(bool isOnTrack){
 		wheelSpeed = wheelSpeed * (1.0f / (1.0f + (Time::delta * 0.001f)));
 	else
 		wheelSpeed = wheelSpeed * (1.0f / (1.0f + (Time::delta * 0.002f)));
-	speed.x = speed.x + wheelSpeed * float(fp_cos(fp(direction))) * Time::delta / 150.0f;
-	speed.z = speed.z + wheelSpeed * float(fp_sin(fp(-direction))) * Time::delta / 150.0f;
+	speed.x = speed.x + wheelSpeed * float(fp_cos(fp(direction))) * Time::delta / 250.0f;
+	speed.z = speed.z + wheelSpeed * float(fp_sin(fp(-direction))) * Time::delta / 250.0f;
 	if(isOnTrack)
 		speed = speed * (1.0f / (1.0f + (Time::delta * 0.01f)));
 	else

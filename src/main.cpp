@@ -1763,16 +1763,32 @@ int main(){
 		enemyCar.render(view);
 		car.render(view);
 
-		char buffer[10];
+		char buffer[20];
 #ifdef SDL
-		sprintf(buffer, "%.3f", Time::delta);
+		sprintf(buffer, "%d", (int)(1.0f / (Time::delta / 128.0f)));
 #endif
 #ifdef PRIZM
-		// sprintf(buffer, "%d", (int)Time::delta);
-		itoa((int)Time::delta, (unsigned char*)buffer);
+		// sprintf(fpsBuffer, "%d", (int)Time::delta);
+		itoa((int)(1.0f / (Time::delta / 128.0f)), (unsigned char*)buffer);
 #endif
 		// Display::fillRect(0, 0, 30, 20, newColor(0, 0, 0));
-		Display::drawText(0, 0, buffer, newColor(255, 255, 255));
+		Display::drawText(0, 0, "FPS: ", newColor(255, 255, 255));
+		Display::drawText(Display::textWidth("FPS: "), 0, buffer, newColor(255, 255, 255));
+
+		float speed2 = car.speed.length2();
+		float speed;
+		if(speed2 != 0)
+			speed = (1.0f / car.speed.i_length()) * 128.0f / 1000.0f * 3600.0f;
+		else
+			speed = 0;
+#ifdef SDL
+		sprintf(buffer, "%d", (int)speed);
+#endif
+#ifdef PRIZM
+		itoa((int)speed, (unsigned char*)buffer);
+#endif
+		Display::drawText(0, DISPLAY_HEIGHT-Display::textHeight, "SPEED: ", newColor(255, 255, 255));
+		Display::drawText(Display::textWidth("SPEED: "), DISPLAY_HEIGHT-Display::textHeight, buffer, newColor(255, 255, 255));
 
 		Display::show();
 	}
