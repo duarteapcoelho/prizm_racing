@@ -23,13 +23,13 @@ TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	src
 DATA		:=	data  
-INCLUDES	:= include
+INCLUDES	:=
 
 #---------------------------------------------------------------------------------
 # options for code and add-in generation
 #---------------------------------------------------------------------------------
 
-MKG3AFLAGS := -n basic:racing -i uns:../unselected.bmp -i sel:../selected.bmp
+MKG3AFLAGS := -n basic:racing -i uns:../resources/unselected.bmp -i sel:../resources/selected.bmp
 
 # Optional: add -flto to CFLAGS and LDFLAGS to enable link-time optimization
 # (LTO). Doing so will usually allow the compiler to generate much better code

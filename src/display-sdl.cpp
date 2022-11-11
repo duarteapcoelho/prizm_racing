@@ -33,7 +33,7 @@ namespace Display {
 		show();
 
 		TTF_Init();
-		font = TTF_OpenFont("font.ttf", 10);
+		font = TTF_OpenFont("resources/font.ttf", 10);
 		TTF_SizeText(font, "A", NULL, &textHeight);
 	}
 

@@ -3,12 +3,11 @@ CFLAGS += -Wall -Wextra
 CFLAGS += -DSDL
 LIB += -lSDL2 -lSDL2_ttf
 LDFLAGS = $(LIB)
-INCLUDES = -Iinclude
+INCLUDES =
 
 SRCDIR = src
 
 SOURCES = $(wildcard src/*.cpp)
-HEADERS = $(wildcard $(INCDIR)/*.h)
 OBJECTS = $(patsubst $(SRCDIR)/%,build_sdl/%,$(SOURCES:.cpp=.o))
 DEPS = $(patsubst $(SRCDIR)/%,build_sdl/%,$(SOURCES:.cpp=.d))
 
@@ -39,7 +38,8 @@ build_sdl/%.o: $(SRCDIR)/%.cpp
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ -MMD $< -MF "build_sdl/$(patsubst $(SRCDIR)/%,%,$(<:.cpp=.d))"
 
 clean:
-	rm $(TARGET) build_sdl/*
+	rm $(TARGET)
+	rm build_sdl -r
 
 .PHONY: clean
 
