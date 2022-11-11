@@ -17,6 +17,11 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 - If you return from the menu, press any key to continue playing
 - **Tip**: if you use `left` and `right` to turn and `8` to accelerate, you can turn while accelerating
 
+## How to install
+- Download the `prizm_racing.zip` file from the releases page and extract it to get the `racing.g3a` file.
+- Connect the calculator via USB and choose the `USB Flash` option (`F1`)
+- Copy the file to the calculator.
+
 ## Notes/Bugs
 - In multiplayer, each player sees the other car behind where it really is, so it's possible that both players see themselves finish first.
 - For multiplayer to work, both calculators must be running at the same frequency (if you overclock one, you must overclock both).
