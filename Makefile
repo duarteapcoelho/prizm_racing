@@ -1,46 +1,15 @@
-CC = g++
-CFLAGS += -Wall -Wextra
-CFLAGS += -DSDL
-LIB += -lSDL2 -lSDL2_ttf
-LDFLAGS = $(LIB)
-INCLUDES =
+all: sdl prizm
 
-SRCDIR = src
+sdl: sdl/racing
 
-SOURCES = $(wildcard src/*.cpp)
-OBJECTS = $(patsubst $(SRCDIR)/%,build_sdl/%,$(SOURCES:.cpp=.o))
-DEPS = $(patsubst $(SRCDIR)/%,build_sdl/%,$(SOURCES:.cpp=.d))
-
-TARGET = racing
-
-all: debug
-
-debug: CFLAGS += -Og -g
-debug: $(TARGET)
-
-release: CFLAGS += -Ofast
-release: $(TARGET)
-
-profile-generate: CFLAGS += -fprofile-generate
-profile-generate: LDFLAGS += -fprofile-generate
-profile-generate: release
-
-profile-use: CFLAGS += -fprofile-use=profile
-profile-use: LDFLAGS += -fprofile-use=profile -lgcov
-profile-use: release
-
-$(TARGET): $(OBJECTS)
-	@echo "Linking..."
-	$(CC) $^ -o $(TARGET) $(LIB)
-
-build_sdl/%.o: $(SRCDIR)/%.cpp
-	mkdir -p build_sdl
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ -MMD $< -MF "build_sdl/$(patsubst $(SRCDIR)/%,%,$(<:.cpp=.d))"
+prizm: prizm/racing.g3a
 
 clean:
-	rm $(TARGET)
-	rm build_sdl -r
+	make $(MFLAGS) -C sdl/ clean
+	make $(MFLAGS) -C prizm/ clean
 
-.PHONY: clean
+sdl/racing:
+	make $(MFLAGS) -C sdl/
 
--include $(DEPS)
+prizm/racing.g3a:
+	make $(MFLAGS) -C prizm/

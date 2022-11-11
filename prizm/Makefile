@@ -7,7 +7,7 @@
 # to use a system environment var in the future.
 #---------------------------------------------------------------------------------
 ifeq ($(strip $(FXCGSDK)),)
-export FXCGSDK := $(abspath ../../)
+export FXCGSDK := $(abspath ../../../)
 endif
 
 include $(FXCGSDK)/toolchain/prizm_rules
@@ -19,9 +19,9 @@ include $(FXCGSDK)/toolchain/prizm_rules
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	$(notdir $(CURDIR))
+TARGET		:=	racing
 BUILD		:=	build
-SOURCES		:=	src
+SOURCES		:=	../src
 DATA		:=	data  
 INCLUDES	:=
 
@@ -29,7 +29,7 @@ INCLUDES	:=
 # options for code and add-in generation
 #---------------------------------------------------------------------------------
 
-MKG3AFLAGS := -n basic:racing -i uns:../resources/unselected.bmp -i sel:../resources/selected.bmp
+MKG3AFLAGS := -n basic:racing -i uns:../../resources/icons/unselected.bmp -i sel:../../resources/icons/selected.bmp
 
 # Optional: add -flto to CFLAGS and LDFLAGS to enable link-time optimization
 # (LTO). Doing so will usually allow the compiler to generate much better code
@@ -105,7 +105,7 @@ export OUTPUT	:=	$(CURDIR)/$(TARGET)
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile-prizm
+	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 $(BUILD):
 	@mkdir $@

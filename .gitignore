@@ -1,5 +1,8 @@
-build
-build_sdl
-racing
-racing.bin
-racing.g3a
+prizm/*
+!prizm/Makefile
+
+sdl/*
+!sdl/Makefile
+
+resources/models/models.h
+resources/models/models.blend1
