@@ -1,3 +1,5 @@
+SOURCES = $(wildcard src/*)
+
 all: sdl prizm
 
 sdl: sdl/racing
@@ -8,8 +10,8 @@ clean:
 	make $(MFLAGS) -C sdl/ clean
 	make $(MFLAGS) -C prizm/ clean
 
-sdl/racing:
+sdl/racing: $(SOURCES)
 	make $(MFLAGS) -C sdl/
 
-prizm/racing.g3a:
+prizm/racing.g3a: $(SOURCES)
 	make $(MFLAGS) -C prizm/
