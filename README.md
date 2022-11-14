@@ -28,7 +28,7 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 - The car's movement isn't totally independent from framerate, so it may be a bit more or less slippery if you're overclocking or underclocking.
 - This game also works on casio fx-CG20 calculators, but it's too slow (at least without overclocking).
 - Running this game might cause file transfer to stop working. To fix this, reset the calculator by pressing the button on the back or removing and re-inserting a battery. This doesn't delete any files.
-- If you connect the cable while one calculator is in the menu, it might start trying to receive data. To avoid this, only connect the cable while the game is running on both calculators).
+- If you connect the cable while one calculator is in the menu, it might start trying to receive files. To avoid this, only connect the cable while the game is running on both calculators.
 
 ## How to build
 ### Linux
