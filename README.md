@@ -4,6 +4,7 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 ## Pictures
 ![Picture 1](resources/picture1.png)
 ![Picture 2](resources/picture2.jpg)
+![Video](resources/video.gif)
 
 ## Features
 - 3D graphics
