@@ -114,6 +114,10 @@ namespace Rasterizer {
 		vec3<int> p1 = toScreen(p1_d);
 		vec3<int> p2 = toScreen(p2_d);
 
+		if(dot(mat4::toMat3(model->viewMatrix) * mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(0, 0, 1)) > 0){
+			return;
+		}
+
 		int minY = max(min(min(p0.y, p1.y), p2.y), 0);
 		int maxY = min(max(max(p0.y, p1.y), p2.y), RENDER_HEIGHT);
 		fp z = (p0.z + p1.z + p2.z) / 3;
