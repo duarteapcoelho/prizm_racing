@@ -208,16 +208,28 @@ namespace Rasterizer {
 					maxX = b;
 					minX = a;
 				}
+				int p = minX+y*RENDER_WIDTH;
+#ifdef PRIZM
+				unsigned short *vram = Display::VRAMAddress + p;
+#endif
 				for(int x = minX; x < maxX; x++){
-					if(z < depthBuffer[x+y*RENDER_WIDTH] || depthBuffer[x+y*RENDER_WIDTH] == -1 || !useDepth){
+					if(z < depthBuffer[p] || depthBuffer[p] == -1 || !useDepth){
 						if(useDepth)
-							depthBuffer[x+y*RENDER_WIDTH] = z;
+							depthBuffer[p] = z;
 #if PIXEL_SIZE == 1
+#ifdef PRIZM
+						*vram = triangle.c.color;
+#else
 						Display::drawPoint(x, y, triangle.c);
+#endif
 #else
 						Display::fillRect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, triangle.c);
 #endif
 					}
+					p++;
+#ifdef PRIZM
+					vram++;
+#endif
 				}
 			}
 		}

@@ -40,6 +40,7 @@ namespace Rasterizer {
 	void reset();
 	extern fp *depthBuffer;
 
+	extern fp fov_d;
 	void setFOV(int fov);
 
 	vec3<fp> toDevice(vec3<fp> p);

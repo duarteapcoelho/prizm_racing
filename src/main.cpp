@@ -50,7 +50,7 @@ int main(){
 	Track::simpleConeMesh = {2, simpleConeTriangles};
 
 	Display::init();
-	Display::clear(newColor(0, 0, 0));
+	Display::clear(newColor(70, 180, 220));
 	Display::show();
 
 	Time::update();
@@ -61,25 +61,6 @@ int main(){
 	Rasterizer::depthBuffer = depthBuffer;
 
 	srand(0);
-
-	Triangle floorTriangles[2] = {
-		{
-			{-400, 0, -400},
-			{-400, 0, 400},
-			{400, 0, -400},
-			{0, -1, 0},
-			newColor(32, 79, 19)
-		},
-		{
-			{-400, 0, 400},
-			{400, 0, 400},
-			{400, 0, -400},
-			{0, -1, 0},
-			newColor(32, 79, 19)
-		},
-	};
-
-	Model floor({2, floorTriangles});
 
 	Triangle sunTriangles[2] = {
 		{
@@ -226,13 +207,26 @@ int main(){
 			cameraSpeed = ls;
 		}
 
-		Display::clear(newColor(70, 180, 220));
-
 		view = mat4();
 		view = mat4::rotateX(view, HALF_PI*0.1);
 		view = mat4::translate(view, 0, 2, 6);
 		view = mat4::rotateY(view, -cameraAngle - HALF_PI);
 		view = mat4::translate(view, -cameraPos.x, 0, -cameraPos.z);
+
+		int floorY = fp_tan(-HALF_PI*0.1) / Rasterizer::fov_d * fp(DISPLAY_WIDTH) + fp(DISPLAY_HEIGHT/2);
+#ifdef PRIZM
+		long v1 = newColor(70, 180, 220).color | (newColor(70, 180, 220).color << (8*sizeof(unsigned short)));
+		long v2 = newColor(32, 79, 19).color | (newColor(32, 79, 19).color << (8*sizeof(unsigned short)));
+		for(int i = 0; i < floorY*DISPLAY_WIDTH/2; i++){
+			((long*)Display::VRAMAddress)[i] = v1;
+		}
+		for(int i = floorY*DISPLAY_WIDTH/2; i < DISPLAY_WIDTH*DISPLAY_HEIGHT/2; i++){
+			((long*)Display::VRAMAddress)[i] = v2;
+		}
+#else
+		Display::clear(newColor(70, 180, 220));
+		Display::fillRect(0, floorY, DISPLAY_WIDTH, DISPLAY_HEIGHT-floorY, newColor(32, 79, 19));
+#endif
 
 		sun.viewMatrix = view;
 		sun.modelMatrix = mat4();
@@ -240,9 +234,6 @@ int main(){
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, cameraPos.x, 0, cameraPos.z);
 		sun.modelMatrix = mat4::rotateY(sun.modelMatrix, cameraAngle + HALF_PI);
 		sun.draw(false, false, true);
-
-		floor.viewMatrix = view;
-		floor.draw(false, false, true);
 
 		track.render(view, car.position);
 
@@ -257,7 +248,6 @@ int main(){
 		// sprintf(fpsBuffer, "%d", (int)Time::delta);
 		itoa((int)(1.0f / (Time::delta / 128.0f)), (unsigned char*)buffer);
 #endif
-		// Display::fillRect(0, 0, 30, 20, newColor(0, 0, 0));
 		Display::drawText(0, 0, "FPS: ", newColor(255, 255, 255));
 		Display::drawText(Display::textWidth("FPS: "), 0, buffer, newColor(255, 255, 255));
 

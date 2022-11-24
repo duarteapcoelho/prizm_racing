@@ -45,7 +45,7 @@ void Track::render(mat4 viewMatrix, vec3<float> carPos){
 	model.viewMatrix = viewMatrix;
 	model.draw(false, false, true);
 
-	for(int i = 0; i < numPoints; i+=1){
+	for(int i = 0; i < numPoints; i+=2){
 		float d = (points[i] - carPos).length2();
 		if(d < 150*150){
 			cones[i*2].mesh = coneMesh;

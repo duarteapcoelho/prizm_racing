@@ -21,8 +21,9 @@ namespace Display {
 	}
 
 	void clear(Color color){
-		for(unsigned short *s = VRAMAddress; s < VRAMAddress + DISPLAY_WIDTH*DISPLAY_HEIGHT; s++){
-			*s = color.color;
+		long v = color.color | (color.color << (8*sizeof(unsigned short)));
+		for(int i = 0; i < DISPLAY_WIDTH*DISPLAY_HEIGHT/2; i++){
+			((long*)VRAMAddress)[i] = v;
 		}
 	}
 	void destroy(){}
