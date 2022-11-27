@@ -10,6 +10,11 @@
 #include "car.h"
 #include "track.h"
 
+#ifdef GINT
+#include <gint/gint.h>
+#include <gint/mmu.h>
+#endif
+
 #ifdef PRIZM
 #include <fxcg/system.h>
 #include <fxcg/serial.h>
@@ -21,12 +26,19 @@ vec3<float> cameraPos = {0, 0, 0};
 vec3<float> cameraSpeed = {0, 0, 0};
 float cameraAngle = 0;
 
-int main(){
-	fp st[SIN_SAMPLES];
-	sinTable = st;
-	createSinTable();
-
+#ifdef GINT
+static GALIGNED(32) fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
+#endif
+
+int main(){
+#ifndef GINT
+	fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
+#include "models.h"
+#endif
+	Rasterizer::depthBuffer = depthBuffer;
+
+	createSinTable();
 
 	Triangle simpleConeTriangles[] = {
 		{
@@ -56,9 +68,6 @@ int main(){
 	Time::update();
 
 	Input::init();
-
-	fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
-	Rasterizer::depthBuffer = depthBuffer;
 
 	srand(0);
 
@@ -171,6 +180,9 @@ int main(){
 #endif
 
 		if(Input::keyPressed(KEY_MENU)){
+#ifdef GINT
+			gint_osmenu();
+#endif
 #ifdef PRIZM
 			while(Input::keyDown(KEY_MENU))
 				Input::update();
@@ -184,12 +196,14 @@ int main(){
 			Bdisp_EnableColor(1);
 			GetKey(&k);
 
-			Time::update();
 			continue;
 #endif
 #ifdef SDL
 			return 0;
 #endif
+			int t = Time::delta;
+			Time::update();
+			Time::delta = t;
 		}
 
 		car.processInput();
@@ -241,12 +255,10 @@ int main(){
 		car.render(view);
 
 		char buffer[20];
-#ifdef SDL
-		sprintf(buffer, "%d", (int)(1.0f / (Time::delta / 128.0f)));
-#endif
 #ifdef PRIZM
-		// sprintf(fpsBuffer, "%d", (int)Time::delta);
 		itoa((int)(1.0f / (Time::delta / 128.0f)), (unsigned char*)buffer);
+#else
+		sprintf(buffer, "%d", (int)(1.0f / (Time::delta / 128.0f)));
 #endif
 		Display::drawText(0, 0, "FPS: ", newColor(255, 255, 255));
 		Display::drawText(Display::textWidth("FPS: "), 0, buffer, newColor(255, 255, 255));
@@ -257,11 +269,10 @@ int main(){
 			speed = (1.0f / car.speed.i_length()) * 128.0f / 1000.0f * 3600.0f;
 		else
 			speed = 0;
-#ifdef SDL
-		sprintf(buffer, "%d", (int)speed);
-#endif
 #ifdef PRIZM
 		itoa((int)speed, (unsigned char*)buffer);
+#else
+		sprintf(buffer, "%d", (int)speed);
 #endif
 		Display::drawText(0, DISPLAY_HEIGHT-Display::textHeight, "SPEED: ", newColor(255, 255, 255));
 		Display::drawText(Display::textWidth("SPEED: "), DISPLAY_HEIGHT-Display::textHeight, buffer, newColor(255, 255, 255));

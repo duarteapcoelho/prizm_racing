@@ -2,6 +2,7 @@
 #include "input.h"
 #include "util.h"
 
+#define keyboard_register ((unsigned short*)0xA44B0000)
 unsigned short lastkey[8] = {0,0,0,0,0,0,0,0};
 unsigned short holdkey[8] = {0,0,0,0,0,0,0,0};
 

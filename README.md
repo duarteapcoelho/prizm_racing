@@ -31,13 +31,18 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 - If you connect the cable while one calculator is in the menu, it might start trying to receive files. To avoid this, only connect the cable while the game is running on both calculators.
 
 ## How to build
-### Linux
-- Either set up the Prizm SDK ([PrizmSDK Setup Guide](https://prizm.cemetech.net/index.php/PrizmSDK_Setup_Guide))
+### gint version (doesn't support multiplayer yet)
+#### Linux
+- Install gint ([https://gitea.planet-casio.com/Lephenixnoir/gint](https://gitea.planet-casio.com/Lephenixnoir/gint))
+- Run `make gint`
+
+### prizm sdk version
+#### Linux
+- Set up the Prizm SDK ([PrizmSDK Setup Guide](https://prizm.cemetech.net/index.php/PrizmSDK_Setup_Guide))
 - Set the FXCGSDK environment variable to where you installed libfxcg (`export FXCGSDK=...`), or put the prizm_racing directory in `libfxcg/projects/prizm_racing`.
 - Run `make prizm`
-- If you want to compile the SDL version (used for testing), install sdl2 and sdl2-ttf and run `make sdl`. The binary will be in `sdl/racing`, but it must be run from the prizm_racing directory (with `sdl/racing`)
 
-### Windows
+#### Windows
 - Download the Prizm SDK ([https://github.com/Jonimoose/libfxcg/releases](https://github.com/Jonimoose/libfxcg/releases))
 - Make sure the path to the SDK doesn't contain any spaces
 - Put the `prizm_racing` directory in `PrizmSDK/projects/prizm_racing`
@@ -53,8 +58,7 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 - To improve performance, the cones that are too far away from the camera are replaced with a simpler model and the ones even further away aren't drawn at all.
 
 #### Potential rendering performance improvements
-- Use DMA to clear the screen
-- Draw the grass without using the 3D renderer (maybe using DMA)
+- Use DMA to clear the screen and draw the grass (in progress)
 - Clip models before clipping triangles
 
 ### Multiplayer

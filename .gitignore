@@ -4,5 +4,8 @@ prizm/*
 sdl/*
 !sdl/Makefile
 
+gint/*
+!gint/Makefile
+
 resources/models/models.h
 resources/models/models.blend1

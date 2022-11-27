@@ -5,7 +5,7 @@ file = open(os.path.dirname(__file__) + "/../../src/models.h", "w")
 file.truncate(0)
 for object in bpy.data.objects:
     if object.type == 'MESH':
-        file.write("Triangle " + object.name + "_triangles[" + str(len(object.data.polygons)) + "] = {\n")
+        file.write("#ifdef GINT\nstatic\n#endif\nTriangle " + object.name + "_triangles[" + str(len(object.data.polygons)) + "] = {\n")
         for polygon in object.data.polygons:
             file.write("\t{\n")
             for vertex in polygon.vertices:

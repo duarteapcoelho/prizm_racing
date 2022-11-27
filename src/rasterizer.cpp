@@ -3,6 +3,20 @@
 #include "rmath.h"
 #include "time.h"
 
+#ifdef GINT
+#include <gint/dma.h>
+#include <gint/mmu.h>
+void cache_ocbp(void *buffer, size_t size){
+	for(int i = 0; i < size / 32; i++) {
+		__asm__("ocbp @%0" :: "r"(buffer));
+		buffer += 32;
+	}
+}
+void *mmu_translate_uram(void *ptr){
+	return mmu_uram() + ((uint32_t)ptr - 0x08100000);
+}
+#endif
+
 struct Plane {
 	vec3<fp> n;
 	fp d;
@@ -36,9 +50,16 @@ namespace Rasterizer {
 	}
 
 	void reset(){
+#ifdef GINT
+		fp v = -1;
+		fp *depthBuffer_P1 = (fp*) mmu_translate_uram(depthBuffer);
+		cache_ocbp(depthBuffer, RENDER_WIDTH*RENDER_HEIGHT*sizeof(fp));
+		dma_memset(depthBuffer_P1, *((uint32_t*)&v), RENDER_WIDTH*RENDER_HEIGHT*sizeof(fp));
+#else
 		for(int i = 0; i < RENDER_WIDTH*RENDER_HEIGHT; i++){
 			depthBuffer[i] = -1;
 		}
+#endif
 	}
 
 	void setFOV(int fov){

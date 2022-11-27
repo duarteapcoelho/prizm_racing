@@ -1,7 +1,5 @@
 #ifdef SDL
 #include "display.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 
 SDL_Window *window;
 SDL_Renderer *renderer;

@@ -1,3 +1,6 @@
+#ifdef GINT
+static
+#endif
 Triangle car_triangles[230] = {
 	{
 		{0.794, 0.294, -0.380},
@@ -1610,6 +1613,9 @@ Triangle car_triangles[230] = {
 		newColor(203, 2, 1)
 	},
 };
+#ifdef GINT
+static
+#endif
 Triangle cone_triangles[22] = {
 	{
 		{0.328, -0.679, 0.328},

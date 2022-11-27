@@ -36,7 +36,7 @@ float _float_sin(float x) {
     return _float_cos(x - HALF_PI);
 }
 
-fp *sinTable = nullptr;
+static fp sinTable[SIN_SAMPLES];
 fp _fp_sin(fp x){
 	return fp(_float_sin((float)x));
 }

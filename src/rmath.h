@@ -20,7 +20,6 @@ inline fp fp_floor(fp x){
 }
 
 #define SIN_SAMPLES 1000
-extern fp *sinTable;
 void createSinTable();
 fp _fp_sin(fp x);
 

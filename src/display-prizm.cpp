@@ -1,7 +1,6 @@
 #ifdef PRIZM
 #include "display.h"
 #include "util.h"
-#include <fxcg/display.h>
 
 Color newColor(int r, int g, int b){
 	return {

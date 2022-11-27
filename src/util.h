@@ -1,5 +1,12 @@
 #pragma once
 
+#ifdef GINT
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include <gint/kmalloc.h>
+#endif
+
 #ifdef PRIZM
 #include <fxcg/heap.h>
 #include <fxcg/misc.h>
