@@ -13,6 +13,7 @@
 #ifdef GINT
 #include <gint/gint.h>
 #include <gint/mmu.h>
+#include <gint/dma.h>
 #endif
 
 #ifdef PRIZM
@@ -238,8 +239,19 @@ int main(){
 			((long*)Display::VRAMAddress)[i] = v2;
 		}
 #else
+#ifdef GINT
+		uint16_t sky = newColor(70, 180, 220).color;
+		uint16_t grass = newColor(32, 79, 10).color;
+		int minY = floorY - (floorY%4);
+		int maxY = floorY + (4 - (floorY%4));
+		dma_memset(gint_vram, (sky << 16) | sky, DISPLAY_WIDTH*minY*2);
+		Display::fillRect(0, minY, DISPLAY_WIDTH, floorY-minY, newColor(70, 180, 220));
+		Display::fillRect(0, floorY, DISPLAY_WIDTH, maxY-floorY, newColor(32, 79, 10));
+		dma_memset(gint_vram + DISPLAY_WIDTH*maxY, (grass << 16) | grass, DISPLAY_WIDTH*DISPLAY_HEIGHT*2 - DISPLAY_WIDTH*maxY*2);
+#else
 		Display::clear(newColor(70, 180, 220));
 		Display::fillRect(0, floorY, DISPLAY_WIDTH, DISPLAY_HEIGHT-floorY, newColor(32, 79, 19));
+#endif
 #endif
 
 		sun.viewMatrix = view;
