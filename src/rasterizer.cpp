@@ -50,7 +50,7 @@ namespace Rasterizer {
 	}
 
 	void reset(){
-#ifdef GINT
+#if GINT && PIXEL_SIZE == 1
 		fp v = -1;
 		fp *depthBuffer_P1 = (fp*) mmu_translate_uram(depthBuffer);
 		cache_ocbp(depthBuffer, RENDER_WIDTH*RENDER_HEIGHT*sizeof(fp));
@@ -97,32 +97,72 @@ namespace Rasterizer {
 		};
 	}
 
-	struct Edge {
-		int minY;
-		int maxY;
-		fp x;
-		fp m;
-		Edge *next;
-	};
-	inline Edge newEdge(vec3<int> p0, vec3<int> p1){
-		if(p0.y > p1.y){
-			return {
-				p1.y,
-				p0.y,
-				p1.x,
-				fp(p0.x - p1.x) / fp(p0.y - p1.y),
-				nullptr
-			};
-		} else if(p0.y < p1.y){
-			return {
-				p0.y,
-				p1.y,
-				p0.x,
-				fp(p1.x - p0.x) / fp(p1.y - p0.y),
-				nullptr
-			};
-		} else {
-			return {p0.y, p1.y, p0.x, 0, nullptr};
+	// Draws a triangle which has a horizontal top or bottom
+	inline void _drawFlatSideTriangle(vec3<int> points[3], fp z, Color color, bool useDepth){
+		if(points[0].y == points[1].y && points[1].y == points[2].y && points[2].y == points[0].y){
+			return;
+		}
+
+		int s = points[0].y < points[1].y;
+		if(!s)
+			s = -1;
+
+		if(s == -1){
+			vec3<int> t = points[0];
+			points[0] = points[2];
+			points[2] = t;
+		}
+
+		// sort horizontal side points by X
+		if(points[1].x > points[2].x){
+			vec3<int> t = points[1];
+			points[1] = points[2];
+			points[2] = t;
+		}
+
+		fp x1 = points[0].x;
+		fp x2 = x1;
+		fp a1 = fp(s) * fp(points[1].x - points[0].x) / fp(points[1].y - points[0].y);
+		fp a2 = fp(s) * fp(points[2].x - points[0].x) / fp(points[2].y - points[0].y);
+
+		int minY = points[0].y;
+		int maxY = points[1].y;
+		for(int y = minY; s*(y - maxY) <= 0; y+=s){
+			if(y > 0 && y < RENDER_HEIGHT-1){
+				int minX = clamp((int)x1, 0, RENDER_WIDTH-1);
+				int maxX = clamp((int)x2, 0, RENDER_WIDTH-1);
+
+				int p = minX+y*RENDER_WIDTH;
+#ifdef PRIZM
+				unsigned short *vram = Display::VRAMAddress + p;
+#endif
+#ifdef GINT
+				color_t *vram = gint_vram + p;
+#endif
+
+				for(int x = minX; x <= maxX; x++){
+					if(z < depthBuffer[p] || depthBuffer[p] == fp(-1) || !useDepth){
+						if(useDepth){
+							depthBuffer[p] = z;
+						}
+#if PIXEL_SIZE == 1
+#if PRIZM || GINT
+						*vram = color.color;
+#else
+						Display::drawPoint(x, y, color);
+#endif
+#else
+						Display::fillRect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, color);
+#endif
+					}
+					p++;
+#if PRIZM || GINT
+					vram++;
+#endif
+				}
+			}
+			x1 = x1 + a1;
+			x2 = x2 + a2;
 		}
 	}
 
@@ -131,17 +171,17 @@ namespace Rasterizer {
 		vec3<fp> p1_d = toDevice(triangle.p1);
 		vec3<fp> p2_d = toDevice(triangle.p2);
 
-		vec3<int> p0 = toScreen(p0_d);
-		vec3<int> p1 = toScreen(p1_d);
-		vec3<int> p2 = toScreen(p2_d);
+		vec3<int> points[3] = {
+			toScreen(p0_d),
+			toScreen(p1_d),
+			toScreen(p2_d),
+		};
 
 		if(dot(mat4::toMat3(model->viewMatrix) * mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(0, 0, 1)) > 0){
 			return;
 		}
 
-		int minY = max(min(min(p0.y, p1.y), p2.y), 0);
-		int maxY = min(max(max(p0.y, p1.y), p2.y), RENDER_HEIGHT);
-		fp z = (p0.z + p1.z + p2.z) / 3;
+		fp z = (points[0].z + points[1].z + points[2].z) / 3;
 
 		if(isShaded){
 			fp brightness = dot(mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(I_SQRT_3, -I_SQRT_3, -I_SQRT_3)) * fp(0.6) + fp(0.4);
@@ -155,104 +195,34 @@ namespace Rasterizer {
 			triangle.c = newColor(triangle.c.r, triangle.c.g, triangle.c.b);
 		}
 
-		Edge *edgeTable[RENDER_HEIGHT];
-		Edge edges[3] = {
-			newEdge(p0, p1),
-			newEdge(p1, p2),
-			newEdge(p2, p0),
-		};
-
-		edgeTable[0] = nullptr;
-		for(int i = 0; i < 3; i++){
-			if(edges[i].minY < minY){
-				Edge **e = &(edgeTable[0]);
-				while(*e != nullptr){
-					e = &((*e)->next);
-				}
-				*e = &edges[i];
-				(*e)->x = (*e)->x + fp(-(*e)->minY) * (*e)->m;
-			}
-		}
-
-		for(int y = minY; y < maxY; y++){
-			if(y != 0)
-				edgeTable[y] = nullptr;
-			for(int i = 0; i < 3; i++){
-				if(edges[i].minY == y){
-					Edge **e = &(edgeTable[y]);
-					while(*e != nullptr){
-						e = &((*e)->next);
-					}
-					*e = &edges[i];
+		// sort points by y
+		for(int _i = 0; _i < 2; _i++){
+			for(int i = 0; i < 2; i++){
+				if(points[i].y > points[i+1].y){
+					vec3<int> t = points[i];
+					points[i] = points[i+1];
+					points[i+1] = t;
 				}
 			}
 		}
 
-		Edge *activeEdgeList = nullptr;
-
-		for(int y = minY; y < maxY; y++){
-			// add new edges to the list
-			if(edgeTable[y] != nullptr){
-				Edge **e;
-				for(e = &activeEdgeList; *e != nullptr; e = &((*e)->next)){
-				}
-				*e = edgeTable[y];
-			}
-
-			// remove edges from the list
-			for(Edge **e = &activeEdgeList; *e != nullptr;){
-				if(y == (*e)->maxY){
-					*e = (*e)->next;
-				} else {
-					e = &((*e)->next);
-				}
-			}
-
-			// calculate intersection point
-			for(Edge *e = activeEdgeList; e != nullptr; e = e->next){
-				e->x = e->x + e->m;
-			}
-
-			// draw
-			for(Edge *e = activeEdgeList; e != nullptr && e->next != nullptr; e = e->next->next){
-				int a = e->x;
-				int b = e->next->x;
-				if(a < 0) a = 0;
-				else if(a > RENDER_WIDTH) a = RENDER_WIDTH;
-				if(b < 0) b = 0;
-				else if(b > RENDER_WIDTH) b = RENDER_WIDTH;
-				int minX, maxX;
-				if(a > b){
-					maxX = a;
-					minX = b;
-				} else {
-					maxX = b;
-					minX = a;
-				}
-				int p = minX+y*RENDER_WIDTH;
-#ifdef PRIZM
-				unsigned short *vram = Display::VRAMAddress + p;
-#endif
-				for(int x = minX; x < maxX; x++){
-					if(z < depthBuffer[p] || depthBuffer[p] == -1 || !useDepth){
-						if(useDepth)
-							depthBuffer[p] = z;
-#if PIXEL_SIZE == 1
-#ifdef PRIZM
-						*vram = triangle.c.color;
-#else
-						Display::drawPoint(x, y, triangle.c);
-#endif
-#else
-						Display::fillRect(x*PIXEL_SIZE, y*PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE, triangle.c);
-#endif
-					}
-					p++;
-#ifdef PRIZM
-					vram++;
-#endif
-				}
-			}
+		if(points[0].y == points[1].y || points[1].y == points[2].y){
+			_drawFlatSideTriangle(points, z, triangle.c, useDepth);
+		} else {
+			int x = points[0].x + (points[2].x - points[0].x) * (points[1].y - points[0].y) / (points[2].y - points[0].y);
+			vec3<int> newPoint = vec3<int>(x, points[1].y, z);
+			vec3<int> topPoints[3] = {
+				points[0],
+				points[1],
+				newPoint
+			};
+			vec3<int> bottomPoints[3] = {
+				points[1],
+				newPoint,
+				points[2]
+			};
+			_drawFlatSideTriangle(topPoints, z, triangle.c, useDepth);
+			_drawFlatSideTriangle(bottomPoints, z, triangle.c, useDepth);
 		}
 	}
 
