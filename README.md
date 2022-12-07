@@ -8,7 +8,7 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 ## Features
 - 3D graphics
 - Simple multiplayer (just connect two calculators)
-- Runs at 14 FPS normally and 21 FPS overclocked, on the fx-CG50.
+- Runs at about 16 FPS normally and 21 FPS overclocked, on the fx-CG50.
 
 ## Controls
 - Press `up`/`8` to accelerate and `down`/`5` to brake
@@ -18,35 +18,36 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 - **Tip**: if you use `left` and `right` to turn and `8` to accelerate, you can turn while accelerating
 
 ## How to install
-- Download the `prizm_racing.zip` file from the releases page and extract it to get the `racing.g3a` file.
+- Download the zip file from the releases page and extract it to get the `.g3a` file.
 - Connect the calculator via USB and choose the `USB Flash` option (`F1`)
 - Copy the file to the calculator.
 
 ## Notes/Bugs
 - In multiplayer, each player sees the other car behind where it really is, so it's possible that both players see themselves finish first.
 - For multiplayer to work, both calculators must be running at the same frequency (if you overclock one, you must overclock both).
-- The car's movement isn't totally independent from framerate, so it may be a bit more or less slippery if you're overclocking or underclocking.
+- The car's movement isn't totally independent from framerate, so it may be a bit more or less slippery if you're overclocking, underclocking, or using another calculator.
 - This game also works on casio fx-CG20 calculators, but it's too slow (at least without overclocking).
 - Running this game might cause file transfer to stop working. To fix this, reset the calculator by pressing the button on the back or removing and re-inserting a battery. This doesn't delete any files.
 - If you connect the cable while one calculator is in the menu, it might start trying to receive files. To avoid this, only connect the cable while the game is running on both calculators.
 
 ## How to build
-### gint version (doesn't support multiplayer yet)
-#### Linux
-- Install gint ([https://gitea.planet-casio.com/Lephenixnoir/gint](https://gitea.planet-casio.com/Lephenixnoir/gint))
-- Run `make gint`
-
-### prizm sdk version
+### prizm sdk version (with multiplayer)
+This version supports multiplayer, but it's slower than the gint version.
 #### Linux
 - Set up the Prizm SDK ([PrizmSDK Setup Guide](https://prizm.cemetech.net/index.php/PrizmSDK_Setup_Guide))
 - Set the FXCGSDK environment variable to where you installed libfxcg (`export FXCGSDK=...`), or put the prizm_racing directory in `libfxcg/projects/prizm_racing`.
 - Run `make prizm`
-
-#### Windows
+#### Windows (pirzm sdk version)
 - Download the Prizm SDK ([https://github.com/Jonimoose/libfxcg/releases](https://github.com/Jonimoose/libfxcg/releases))
 - Make sure the path to the SDK doesn't contain any spaces
 - Put the `prizm_racing` directory in `PrizmSDK/projects/prizm_racing`
 - Run `..\..\bin\make.exe prizm`
+
+### gint version (singleplayer only)
+This version doesn't support multiplayer, but it runs faster and doesn't have a border.
+#### Linux
+- Install gint ([https://gitea.planet-casio.com/Lephenixnoir/gint](https://gitea.planet-casio.com/Lephenixnoir/gint))
+- Run `make gint`
 
 ## Technical information
 ### 3D rendering
