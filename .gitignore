@@ -8,7 +8,7 @@ gint/*
 !gint/Makefile
 
 ce/*
-!ce/Makefile
+!ce/makefile
 !ce/icon.png
 
 resources/models/models.h
