@@ -131,8 +131,10 @@ int main(){
 	Rasterizer::setFOV(70);
 
 	Car car = Car();
+#ifdef PRIZM
 	Car enemyCar = Car();
 	enemyCar.position = {-1000, 0, 0};
+#endif
 
 #ifdef PRIZM
 	while(Serial_IsOpen() != 1){
@@ -263,7 +265,9 @@ int main(){
 
 		track.render(view, car.position);
 
+#ifdef PRIZM
 		enemyCar.render(view);
+#endif
 		car.render(view);
 
 		char buffer[20];
