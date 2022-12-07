@@ -7,6 +7,10 @@ sdl/*
 gint/*
 !gint/Makefile
 
+ce/*
+!ce/Makefile
+!ce/icon.png
+
 resources/models/models.h
 resources/models/models.blend1
 

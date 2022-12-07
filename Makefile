@@ -8,10 +8,13 @@ prizm: prizm/racing.g3a
 
 gint: gint/racing_singleplayer.g3a
 
+ce: ce/bin/DEMO.8xp
+
 clean:
 	make $(MFLAGS) -C sdl/ clean
 	make $(MFLAGS) -C prizm/ clean
 	make $(MFLAGS) -C gint/ clean
+	make $(MFLAGS) -C ce/ clean
 
 sdl/racing: $(SOURCES)
 	make $(MFLAGS) -C sdl/
@@ -21,6 +24,9 @@ prizm/racing.g3a: $(SOURCES)
 
 gint/racing_singleplayer.g3a: $(SOURCES)
 	make $(MFLAGS) -C gint/
+
+ce/bin/DEMO.8xp: $(SOURCES)
+	make $(MFLAGS) -C ce/
 
 package: release/racing.zip release/racing.tar.gz release/racing_singleplayer.zip release/racing_singleplayer.tar.gz
 

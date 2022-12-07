@@ -66,6 +66,7 @@ int main(){
 	Display::clear(newColor(70, 180, 220));
 	Display::show();
 
+	Time::init();
 	Time::update();
 
 	Input::init();

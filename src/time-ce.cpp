@@ -1,12 +1,14 @@
-#ifdef SDL
+#ifdef CE
 #include "time.h"
-#include <SDL2/SDL.h>
+#include <sys/rtc.h>
 
 namespace Time {
-	void init(){}
+	void init(){
+		rtc_Enable(0);
+	}
 	void update(){
 		const float lastTime = time;
-		time = ((float)(SDL_GetTicks()) / (1000.0/128.0));
+		time = rtc_Time();
 		delta = time - lastTime;
 	}
 };

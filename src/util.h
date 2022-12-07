@@ -20,6 +20,12 @@
 #define srand sys_srand
 #endif
 
+#ifdef CE
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#endif
+
 #ifdef SDL
 #include "stdio.h"
 #include "stdlib.h"
