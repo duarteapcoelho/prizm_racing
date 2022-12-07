@@ -5,7 +5,7 @@
 NAME = DEMO
 ICON = icon.png
 DESCRIPTION = "CE C Toolchain Demo"
-COMPRESSED = NO
+COMPRESSED = YES
 ARCHIVED = NO
 
 SRCDIR = ../src/
