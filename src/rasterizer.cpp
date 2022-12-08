@@ -184,10 +184,6 @@ namespace Rasterizer {
 			toScreen(p2_d),
 		};
 
-		if(dot(mat4::toMat3(model->viewMatrix) * mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(0, 0, 1)) > 0){
-			return;
-		}
-
 		unsigned char z = (points[0].z + points[1].z + points[2].z) / 3;
 
 		if(isShaded){
@@ -360,6 +356,10 @@ namespace Rasterizer {
 	}
 
 	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded, bool clipTriangles){
+		if(dot(mat4::toMat3(model->viewMatrix) * mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(0, 0, 1)) > 0){
+			return;
+		}
+
 		triangle.p0 = model->viewMatrix * model->modelMatrix * triangle.p0;
 		triangle.p1 = model->viewMatrix * model->modelMatrix * triangle.p1;
 		triangle.p2 = model->viewMatrix * model->modelMatrix * triangle.p2;
