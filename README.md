@@ -8,7 +8,7 @@ A 3D, multiplayer racing game for casio fx-CG50 calculators
 ## Features
 - 3D graphics
 - Simple multiplayer (just connect two calculators)
-- Runs at about 16 FPS normally and 21 FPS overclocked, on the fx-CG50.
+- The multiplayer version runs at about 14 FPS and the singleplayer version runs at 24 FPS
 
 ## Controls
 - Press `up`/`8` to accelerate and `down`/`5` to brake
@@ -54,14 +54,10 @@ This version doesn't support multiplayer, but it runs faster and doesn't have a 
 ### 3D rendering
 - All the rendering code is in `src/rasterizer.h` and `src/rasterizer.cpp`
 - Every triangle is clipped to avoid drawing triangles outside the screen. If a triangle is only partially inside the screen, it's cut in one or two triangles. This doesn't happen with the cones and the car to improve performance.
-- The triangles are rasterized using the scan line algorithm with a depth buffer.
+- The triangles are split into two (one with a flat top and another with a flat bottom) and rasterized.
 - This renderer only supports diffuse directional lighting, because this way there is only one color per triangle, which increases performance.
 - Because the calculator doesn't have a floating point unit (FPU), everything related to rendering uses fixed point numbers (defined in src/fp.h). This caused some issues related to precision, most of which were solved by checking where the floating point calculations were overflowing.
 - To improve performance, the cones that are too far away from the camera are replaced with a simpler model and the ones even further away aren't drawn at all.
-
-#### Potential rendering performance improvements
-- Use DMA to clear the screen and draw the grass (in progress)
-- Clip models before clipping triangles
 
 ### Multiplayer
 All of the multiplayer code is in `src/main.cpp`
