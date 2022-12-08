@@ -47,6 +47,7 @@ This version supports multiplayer, but it's slower than the gint version.
 This version doesn't support multiplayer, but it runs faster and doesn't have a border.
 #### Linux
 - Install gint ([https://gitea.planet-casio.com/Lephenixnoir/gint](https://gitea.planet-casio.com/Lephenixnoir/gint))
+- Install libprof ([https://gitea.planet-casio.com/Lephenixnoir/libprof](https://gitea.planet-casio.com/Lephenixnoir/libprof))
 - Run `make gint`
 
 ## Technical information

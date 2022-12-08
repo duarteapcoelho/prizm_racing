@@ -1,7 +1,7 @@
 CC = sh-elf-g++
 CFLAGS += -Wall -Wextra -Ofast -funroll-loops -DGINT
 CFLAGS += -DFXCG50 -DTARGET_FXCG50 -m4-nofpu -mb -ffreestanding -nostdlib -fstrict-volatile-bitfields
-LDFLAGS = -m4-nofpu -mb -nostdlib -Wl,--no-warn-rwx-segments -T fxcg50.ld -lgint-cg -lc -lgcc -lgint-cg
+LDFLAGS = -m4-nofpu -mb -nostdlib -Wl,--no-warn-rwx-segments -T fxcg50.ld -lgint-cg -lc -lgcc -lgint-cg -lprof-cg
 
 INCLUDES =
 

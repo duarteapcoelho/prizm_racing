@@ -62,6 +62,8 @@ int main(){
 	Track::coneMesh = {22, cone_triangles};
 	Track::simpleConeMesh = {2, simpleConeTriangles};
 
+	Time::init();
+
 	Display::init();
 	Display::clear(newColor(70, 180, 220));
 	Display::show();
