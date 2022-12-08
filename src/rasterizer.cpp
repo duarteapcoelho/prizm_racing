@@ -369,12 +369,14 @@ namespace Rasterizer {
 		}
 
 		int inside = 5;
-		for(int i = 0; i < 5; i++){
-			if(dot(clippingPlanes[i].n, triangle.p0) + clippingPlanes[i].d < 0
-					|| dot(clippingPlanes[i].n, triangle.p1) + clippingPlanes[i].d < 0
-					|| dot(clippingPlanes[i].n, triangle.p2) + clippingPlanes[i].d < 0){
-				inside--;
-				break;
+		if(clipTriangles){
+			for(int i = 0; i < 5; i++){
+				if(dot(clippingPlanes[i].n, triangle.p0) + clippingPlanes[i].d < 0
+						|| dot(clippingPlanes[i].n, triangle.p1) + clippingPlanes[i].d < 0
+						|| dot(clippingPlanes[i].n, triangle.p2) + clippingPlanes[i].d < 0){
+					inside--;
+					break;
+				}
 			}
 		}
 
@@ -396,8 +398,28 @@ Model::Model(){
 }
 Model::Model(Mesh mesh){
 	this->mesh = mesh;
+	fp radius2 = 0;
+	for(int i = 0; i < mesh.numTriangles; i++){
+		fp d0 = mesh.triangles[i].p0.length2();
+		fp d1 = mesh.triangles[i].p1.length2();
+		fp d2 = mesh.triangles[i].p2.length2();
+		radius2 = max(radius2, d0);
+		radius2 = max(radius2, d1);
+		radius2 = max(radius2, d2);
+	}
+	float i_radius = _isqrt(radius2);
+	radius = 1.0f/i_radius;
 }
 void Model::draw(bool useDepth, bool isShaded, bool clipTriangles){
+	if(!clipTriangles){
+		vec3<fp> center = viewMatrix * modelMatrix * vec3<fp>(0, 0, 0);
+		for(int i = 0; i < 5; i++){
+			if(dot(Rasterizer::clippingPlanes[i].n, center) + Rasterizer::clippingPlanes[i].d < radius){
+				return;
+			}
+		}
+	}
+
 	for(int i = 0; i < mesh.numTriangles; i++){
 		Rasterizer::drawTriangle(this, mesh.triangles[i], useDepth, isShaded, clipTriangles);
 	}

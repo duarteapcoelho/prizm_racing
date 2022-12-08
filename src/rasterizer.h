@@ -26,6 +26,7 @@ struct Mesh {
 };
 
 class Model {
+	fp radius;
 public:
 	Mesh mesh;
 	mat4 modelMatrix;
