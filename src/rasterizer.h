@@ -38,7 +38,7 @@ public:
 namespace Rasterizer {
 	void init();
 	void reset();
-	extern fp *depthBuffer;
+	extern unsigned char *depthBuffer;
 
 	extern fp fov_d;
 	void setFOV(int fov);

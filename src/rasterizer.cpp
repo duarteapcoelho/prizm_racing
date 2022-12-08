@@ -37,7 +37,7 @@ inline int max(int a, int b){
 namespace Rasterizer {
 	Plane clippingPlanes[5];
 
-	fp *depthBuffer;
+	unsigned char *depthBuffer;
 
 	fp fov_d = 1;
 
@@ -50,14 +50,21 @@ namespace Rasterizer {
 	}
 
 	void reset(){
+		unsigned char value = -1;
+#if GINT || PRIZM
+		long v = value | (value << 8) | (value << 16) | (value << 24);
+#endif
 #if GINT && PIXEL_SIZE == 1
-		fp v = -1;
-		fp *depthBuffer_P1 = (fp*) mmu_translate_uram(depthBuffer);
-		cache_ocbp(depthBuffer, RENDER_WIDTH*RENDER_HEIGHT*sizeof(fp));
-		dma_memset(depthBuffer_P1, *((uint32_t*)&v), RENDER_WIDTH*RENDER_HEIGHT*sizeof(fp));
+		unsigned char *depthBuffer_P1 = (unsigned char*) mmu_translate_uram(depthBuffer);
+		cache_ocbp(depthBuffer, RENDER_WIDTH*RENDER_HEIGHT*sizeof(unsigned char));
+		dma_memset(depthBuffer_P1, *((uint32_t*)&v), RENDER_WIDTH*RENDER_HEIGHT*sizeof(unsigned char));
+#elif PRIZM
+		for(int i = 0; i < RENDER_WIDTH*RENDER_HEIGHT/4; i++){
+			*(((long*)depthBuffer) + i) = v;
+		}
 #else
 		for(int i = 0; i < RENDER_WIDTH*RENDER_HEIGHT; i++){
-			depthBuffer[i] = -1;
+			depthBuffer[i] = value;
 		}
 #endif
 	}
@@ -98,7 +105,7 @@ namespace Rasterizer {
 	}
 
 	// Draws a triangle which has a horizontal top or bottom
-	inline void _drawFlatSideTriangle(vec3<int> points[3], fp z, Color color, bool useDepth){
+	inline void _drawFlatSideTriangle(vec3<int> points[3], unsigned char z, Color color, bool useDepth){
 		if(points[0].y == points[1].y && points[1].y == points[2].y && points[2].y == points[0].y){
 			return;
 		}
@@ -141,7 +148,7 @@ namespace Rasterizer {
 #endif
 
 				for(int x = minX; x <= maxX; x++){
-					if(z < depthBuffer[p] || depthBuffer[p] == fp(-1) || !useDepth){
+					if(z < depthBuffer[p] || !useDepth){
 						if(useDepth){
 							depthBuffer[p] = z;
 						}
@@ -181,7 +188,7 @@ namespace Rasterizer {
 			return;
 		}
 
-		fp z = (points[0].z + points[1].z + points[2].z) / 3;
+		unsigned char z = (points[0].z + points[1].z + points[2].z) / 3;
 
 		if(isShaded){
 			fp brightness = dot(mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(I_SQRT_3, -I_SQRT_3, -I_SQRT_3)) * fp(0.6) + fp(0.4);

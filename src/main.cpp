@@ -28,13 +28,13 @@ vec3<float> cameraSpeed = {0, 0, 0};
 float cameraAngle = 0;
 
 #ifdef GINT
-static GALIGNED(32) fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
+static GALIGNED(32) unsigned char depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
 #endif
 
 int main(){
 #ifndef GINT
-	fp depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
+	unsigned char depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
 #endif
 	Rasterizer::depthBuffer = depthBuffer;
