@@ -139,6 +139,7 @@ int main(){
 #endif
 
 #ifdef PRIZM
+	Serial_Close(1);
 	while(Serial_IsOpen() != 1){
 		unsigned char mode[6] = {0, 5, 0, 0, 0, 0}; // 9600 bps 8n1
 		Serial_Open(mode);
@@ -191,6 +192,9 @@ int main(){
 #ifdef PRIZM
 			while(Input::keyDown(KEY_MENU))
 				Input::update();
+
+			Serial_Close(1);
+
 			timer = Timer_Install(0, []() {
 					Keyboard_PutKeycode(4, 9, 0);
 					Timer_Stop(timer);
@@ -200,6 +204,14 @@ int main(){
 			int k = 0;
 			Bdisp_EnableColor(1);
 			GetKey(&k);
+
+			Serial_Close(1);
+			while(Serial_IsOpen() != 1){
+				unsigned char mode[6] = {0, 5, 0, 0, 0, 0}; // 9600 bps 8n1
+				Serial_Open(mode);
+			}
+			Serial_ClearTX();
+			Serial_ClearRX();
 
 			continue;
 #endif
