@@ -175,14 +175,15 @@ int main(){
 			}
 		}
 
-		while(Serial_PollTX() < sizeof(Car)*2);
-		unsigned char carData[sizeof(Car)*2];
-		for(int i = 0; i < sizeof(Car); i++){
-			carData[i*2] = ((*(((unsigned char*)&car) + i)) & 0xF0) >> 4;
-			carData[i*2+1] = ((*(((unsigned char*)&car) + i)) & 0x0F);
+		if(Serial_PollTX() >= sizeof(Car)*2){
+			unsigned char carData[sizeof(Car)*2];
+			for(int i = 0; i < sizeof(Car); i++){
+				carData[i*2] = ((*(((unsigned char*)&car) + i)) & 0xF0) >> 4;
+				carData[i*2+1] = ((*(((unsigned char*)&car) + i)) & 0x0F);
+			}
+			carData[0] = carData[0] | (1 << 4);
+			Serial_Write(carData, sizeof(Car)*2);
 		}
-		carData[0] = carData[0] | (1 << 4);
-		Serial_Write(carData, sizeof(Car)*2);
 #endif
 
 		if(Input::keyPressed(KEY_MENU)){
@@ -225,6 +226,9 @@ int main(){
 
 		car.processInput();
 		car.update(track.isInside(car.position));
+#ifdef PRIZM
+		enemyCar.update(track.isInside(enemyCar.position));
+#endif
 
 		Rasterizer::setFOV(fp(70 + 50.0f / car.speed.i_length()));
 
