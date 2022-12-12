@@ -43,7 +43,7 @@ Track::Track(int numPoints, vec3<float> *points, float width, float tolerance){
 
 void Track::render(mat4 viewMatrix, vec3<float> carPos){
 	model.viewMatrix = viewMatrix;
-	model.draw(false, false, true);
+	model.draw(false, false, true, true);
 
 	for(int i = 0; i < numPoints; i+=2){
 		float d = (points[i] - carPos).length2();
@@ -58,8 +58,8 @@ void Track::render(mat4 viewMatrix, vec3<float> carPos){
 		}
 		cones[i*2].viewMatrix = viewMatrix;
 		cones[i*2+1].viewMatrix = viewMatrix;
-		cones[i*2].draw(true, true, false);
-		cones[i*2+1].draw(true, true, false);
+		cones[i*2].draw(true, true, false, false);
+		cones[i*2+1].draw(true, true, false, false);
 	}
 }
 

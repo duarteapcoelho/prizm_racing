@@ -279,7 +279,7 @@ int main(){
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, 20, -6, -20);
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, cameraPos.x, 0, cameraPos.z);
 		sun.modelMatrix = mat4::rotateY(sun.modelMatrix, cameraAngle + HALF_PI);
-		sun.draw(false, false, true);
+		sun.draw(false, false, true, true);
 
 		track.render(view, car.position);
 

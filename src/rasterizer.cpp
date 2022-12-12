@@ -355,7 +355,7 @@ namespace Rasterizer {
 		return m;
 	}
 
-	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded, bool clipTriangles){
+	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded, bool clip, bool divide){
 		if(dot(mat4::toMat3(model->viewMatrix) * mat4::toMat3(model->modelMatrix) * triangle.normal, vec3<fp>(0, 0, 1)) > 0){
 			return;
 		}
@@ -369,7 +369,7 @@ namespace Rasterizer {
 		}
 
 		int inside = 5;
-		if(clipTriangles){
+		if(clip){
 			for(int i = 0; i < 5; i++){
 				if(dot(clippingPlanes[i].n, triangle.p0) + clippingPlanes[i].d < 0
 						|| dot(clippingPlanes[i].n, triangle.p1) + clippingPlanes[i].d < 0
@@ -382,7 +382,7 @@ namespace Rasterizer {
 
 		if(inside == 5){
 			_drawTriangle(model, triangle, useDepth, isShaded);
-		} else if(inside != 0 && clipTriangles){
+		} else if(inside != 0 && divide){
 			Mesh mesh = clipTriangle(triangle);
 			for(int i = 0; i < mesh.numTriangles; i++){
 				_drawTriangle(model, mesh.triangles[i], useDepth, isShaded);
@@ -410,8 +410,8 @@ Model::Model(Mesh mesh){
 	float i_radius = _isqrt(radius2);
 	radius = 1.0f/i_radius;
 }
-void Model::draw(bool useDepth, bool isShaded, bool clipTriangles){
-	if(!clipTriangles){
+void Model::draw(bool useDepth, bool isShaded, bool divideTriangles, bool clipModel){
+	if(!clipModel){
 		vec3<fp> center = viewMatrix * modelMatrix * vec3<fp>(0, 0, 0);
 		for(int i = 0; i < 5; i++){
 			if(dot(Rasterizer::clippingPlanes[i].n, center) + Rasterizer::clippingPlanes[i].d < radius){
@@ -421,6 +421,6 @@ void Model::draw(bool useDepth, bool isShaded, bool clipTriangles){
 	}
 
 	for(int i = 0; i < mesh.numTriangles; i++){
-		Rasterizer::drawTriangle(this, mesh.triangles[i], useDepth, isShaded, clipTriangles);
+		Rasterizer::drawTriangle(this, mesh.triangles[i], useDepth, isShaded, clipModel, divideTriangles);
 	}
 }

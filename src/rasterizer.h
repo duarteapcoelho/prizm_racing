@@ -33,7 +33,7 @@ public:
 	mat4 viewMatrix;
 	Model();
 	Model(Mesh mesh);
-	void draw(bool useDepth, bool isShaded, bool clipTriangles);
+	void draw(bool useDepth, bool isShaded, bool divideTriangles, bool clipModel);
 };
 
 namespace Rasterizer {
