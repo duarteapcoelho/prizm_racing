@@ -13,6 +13,13 @@ Color newColor(int r, int g, int b){
 		.b = b
 	};
 }
+Color newColor(unsigned short color){
+	return {
+		.r = ((color & 0b1111100000000000) >> 11) << 3,
+		.g = ((color & 0b0000011111100000) >> 5) << 2,
+		.b =  (color & 0b0000000000011111) << 3,
+	};
+}
 
 namespace Display {
 	int textHeight = 0;

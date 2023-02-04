@@ -18,19 +18,21 @@ Track::Track(int numPoints, vec3<float> *points, float width, float tolerance){
 		vec3<float> nextPerpendicular = {nextDirection.z, nextDirection.y, -nextDirection.x};
 		nextPerpendicular = nextPerpendicular * width * nextPerpendicular.i_length();
 
+		vec3<fp> p0 = pos - perpendicular;
+		vec3<fp> p1 = pos + perpendicular;
+		vec3<fp> p2 = pos - nextPerpendicular + direction;
+		vec3<fp> p3 = pos + nextPerpendicular + direction;
 		triangles[i*2] = {
-			vec3<fp>(pos - perpendicular),
-			vec3<fp>(pos + perpendicular),
-			vec3<fp>(pos - nextPerpendicular + direction),
+			{p0, p1, p2},
 			{0, -1, 0},
-			newColor(50, 50, 50)
+			newColor(50, 50, 50),
+			{{0,0},{0,0},{0,0}}
 		};
 		triangles[i*2+1] = {
-			vec3<fp>(pos + perpendicular),
-			vec3<fp>(pos - nextPerpendicular + direction),
-			vec3<fp>(pos + nextPerpendicular + direction),
+			{p1, p2, p3},
 			{0, -1, 0},
-			newColor(50, 50, 50)
+			newColor(50, 50, 50),
+			{{0,0},{0,0},{0,0}}
 		};
 
 		cones[i*2] = Model(coneMesh);
@@ -47,19 +49,13 @@ void Track::render(mat4 viewMatrix, vec3<float> carPos){
 
 	for(int i = 0; i < numPoints; i+=2){
 		float d = (points[i] - carPos).length2();
-		if(d < 150*150){
-			cones[i*2].mesh = coneMesh;
-			cones[i*2+1].mesh = coneMesh;
-		} else if(d < 200*200){
-			cones[i*2].mesh = simpleConeMesh;
-			cones[i*2+1].mesh = simpleConeMesh;
-		} else {
+		if(d > 150*150){
 			continue;
 		}
 		cones[i*2].viewMatrix = viewMatrix;
 		cones[i*2+1].viewMatrix = viewMatrix;
-		cones[i*2].draw(true, true, false, false);
-		cones[i*2+1].draw(true, true, false, false);
+		cones[i*2].draw(true, true, false, true);
+		cones[i*2+1].draw(true, true, false, true);
 	}
 }
 
@@ -86,4 +82,3 @@ bool Track::isInside(vec3<float> p){
 }
 
 Mesh Track::coneMesh = {0, nullptr};
-Mesh Track::simpleConeMesh = {0, nullptr};

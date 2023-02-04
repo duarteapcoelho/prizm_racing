@@ -10,6 +10,14 @@ Color newColor(int r, int g, int b){
 		.color = ((r & 0b11111000)<<8) + ((g & 0b11111100)<<3)+(b>>3),
 	};
 }
+Color newColor(unsigned short color){
+	return {
+		.r = ((color & 0b1111100000000000) >> 11) << 3,
+		.g = ((color & 0b0000011111100000) >> 5) << 2,
+		.b =  (color &  0b0000000000011111) << 3,
+		.color = color,
+	};
+}
 
 namespace Display {
 	int textHeight = 10;

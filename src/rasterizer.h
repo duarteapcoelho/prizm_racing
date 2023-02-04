@@ -13,16 +13,21 @@
 #define RENDER_HEIGHT (DISPLAY_HEIGHT/PIXEL_SIZE)
 
 struct Triangle {
-	vec3<fp> p0;
-	vec3<fp> p1;
-	vec3<fp> p2;
+	vec3<fp> points[3];
 	vec3<fp> normal;
 	Color c;
+	vec2<fp> texCoords[3];
 };
 
 struct Mesh {
 	int numTriangles;
 	Triangle *triangles;
+};
+
+struct Texture {
+	unsigned short *pixels;
+	int width;
+	int height;
 };
 
 class Model {
@@ -31,8 +36,9 @@ public:
 	Mesh mesh;
 	mat4 modelMatrix;
 	mat4 viewMatrix;
+	Texture *texture = nullptr;
 	Model();
-	Model(Mesh mesh);
+	Model(Mesh mesh, Texture *texture = nullptr);
 	void draw(bool useDepth, bool isShaded, bool divideTriangles, bool clipModel);
 };
 
@@ -47,4 +53,7 @@ namespace Rasterizer {
 	vec3<fp> toDevice(vec3<fp> p);
 	vec3<int> toScreen(vec3<fp> p);
 	void drawLine(vec3<fp> p0, vec3<fp> p1);
+
+	vec3<fp> toDevice(vec3<fp> p);
+	vec3<int> toScreen(vec3<fp> p);
 };

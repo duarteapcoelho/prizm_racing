@@ -30,37 +30,21 @@ float cameraAngle = 0;
 #ifdef GINT
 static GALIGNED(32) unsigned char depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
+#include "textures.h"
 #endif
 
 int main(){
 #ifndef GINT
 	unsigned char depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
+#include "textures.h"
 #endif
 	Rasterizer::depthBuffer = depthBuffer;
 
 	createSinTable();
 
-	Triangle simpleConeTriangles[] = {
-		{
-			{-1, 0, 0},
-			{1, 0, 0},
-			{0, -2, 0},
-			{0, -2, 0},
-			newColor(120, 50, 0)
-		},
-		{
-			{0, 0, -1},
-			{0, 0, 1},
-			{0, -2, 0},
-			{0, -2, 0},
-			newColor(120, 50, 0)
-		}
-	};
-
-	Car::model = Model({230, car_triangles});
-	Track::coneMesh = {22, cone_triangles};
-	Track::simpleConeMesh = {2, simpleConeTriangles};
+	Car::model = Model({181, car_triangles}, &car_texture);
+	Track::coneMesh = {43, cone_triangles};
 
 	Time::init();
 
@@ -74,24 +58,7 @@ int main(){
 
 	srand(0);
 
-	Triangle sunTriangles[2] = {
-		{
-			{-1, -1, 0},
-			{-1, 1, 0},
-			{1, -1, 0},
-			{0, 0, -1},
-			newColor(255, 255, 0)
-		},
-		{
-			{-1, 1, 0},
-			{1, 1, 0},
-			{1, -1, 0},
-			{0, 0, -1},
-			newColor(255, 255, 0)
-		},
-	};
-
-	Model sun({2, sunTriangles});
+	Model sun({8, sun_triangles});
 
 	vec3<float> trackPoints[] = {
 		{0, 0, 0},

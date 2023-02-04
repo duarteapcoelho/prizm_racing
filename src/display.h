@@ -17,6 +17,7 @@
 #endif
 
 Color newColor(int r, int g, int b);
+Color newColor(unsigned short color);
 
 namespace Display {
 	extern int textHeight;

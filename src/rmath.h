@@ -44,3 +44,15 @@ inline T clamp(T v, T min, T max){
 		v = max;
 	return v;
 }
+
+inline int min(int a, int b){
+	if(a < b)
+		return a;
+	return b;
+}
+
+inline int max(int a, int b){
+	if(a > b)
+		return a;
+	return b;
+}
