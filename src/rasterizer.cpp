@@ -29,8 +29,6 @@ struct Plane {
 namespace Rasterizer {
 	Plane clippingPlanes[5];
 
-	unsigned char *depthBuffer;
-
 	fp fov_d = 1;
 
 	void init(){
@@ -39,26 +37,6 @@ namespace Rasterizer {
 		clippingPlanes[2] = {{fp(-I_SQRT_2), 0, fp(I_SQRT_2)}, 0}; // right
 		clippingPlanes[3] = {{0, fp(I_SQRT_2), fp(I_SQRT_2)}, 0}; // bottom
 		clippingPlanes[4] = {{0, fp(-I_SQRT_2), fp(I_SQRT_2)}, 0}; // top
-	}
-
-	void reset(){
-		unsigned char value = -1;
-#if GINT || PRIZM
-		long v = value | (value << 8) | (value << 16) | (value << 24);
-#endif
-#if GINT && PIXEL_SIZE == 1
-		unsigned char *depthBuffer_P1 = (unsigned char*) mmu_translate_uram(depthBuffer);
-		cache_ocbp(depthBuffer, RENDER_WIDTH*RENDER_HEIGHT*sizeof(unsigned char));
-		dma_memset(depthBuffer_P1, *((uint32_t*)&v), RENDER_WIDTH*RENDER_HEIGHT*sizeof(unsigned char));
-#elif PRIZM
-		for(int i = 0; i < RENDER_WIDTH*RENDER_HEIGHT/4; i++){
-			*(((long*)depthBuffer) + i) = v;
-		}
-#else
-		for(int i = 0; i < RENDER_WIDTH*RENDER_HEIGHT; i++){
-			depthBuffer[i] = value;
-		}
-#endif
 	}
 
 	void setFOV(int fov){
@@ -225,7 +203,7 @@ namespace Rasterizer {
 		return m;
 	}
 
-	inline void drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded, bool clip, bool divide){
+	inline void drawTriangle(Model *model, Triangle triangle, bool isShaded, bool clip, bool divide){
 		if(triangle.points[0] == triangle.points[1] || triangle.points[1] == triangle.points[2] || triangle.points[2] == triangle.points[0]){
 			return;
 		}
@@ -244,17 +222,17 @@ namespace Rasterizer {
 
 		if(inside == 5){
 			if(model->texture != nullptr){
-				_drawTriangle_textured(model, triangle, useDepth, isShaded);
+				_drawTriangle_textured(model, triangle, isShaded);
 			} else {
-				_drawTriangle(model, triangle, useDepth, isShaded);
+				_drawTriangle(model, triangle, isShaded);
 			}
 		} else if(inside != 0 && divide){
 			Mesh mesh = clipTriangle(triangle);
 			for(int i = 0; i < mesh.numTriangles; i++){
 				if(model->texture != nullptr){
-					_drawTriangle_textured(model, mesh.triangles[i], useDepth, isShaded);
+					_drawTriangle_textured(model, mesh.triangles[i], isShaded);
 				} else {
-					_drawTriangle(model, mesh.triangles[i], useDepth, isShaded);
+					_drawTriangle(model, mesh.triangles[i], isShaded);
 				}
 			}
 			free(mesh.triangles);
@@ -279,7 +257,7 @@ Model::Model(Mesh mesh, Texture *texture){
 	radius = 1.0f/i_radius;
 }
 
-void Model::draw(bool useDepth, bool isShaded, bool divideTriangles, bool clipModel){
+void Model::draw(bool isShaded, bool divideTriangles, bool clipModel){
 	if(!clipModel){
 		vec3<fp> center = viewMatrix * modelMatrix * vec3<fp>(0, 0, 0);
 		for(int i = 0; i < 5; i++){
@@ -298,6 +276,6 @@ void Model::draw(bool useDepth, bool isShaded, bool divideTriangles, bool clipMo
 		for(int j = 0; j < 3; j++){
 			t.points[j] = viewMatrix * modelMatrix * t.points[j];
 		}
-		Rasterizer::drawTriangle(this, t, useDepth, isShaded, clipModel, divideTriangles);
+		Rasterizer::drawTriangle(this, t, isShaded, clipModel, divideTriangles);
 	}
 }

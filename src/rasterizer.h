@@ -39,13 +39,11 @@ public:
 	Texture *texture = nullptr;
 	Model();
 	Model(Mesh mesh, Texture *texture = nullptr);
-	void draw(bool useDepth, bool isShaded, bool divideTriangles, bool clipModel);
+	void draw(bool isShaded, bool divideTriangles, bool clipModel);
 };
 
 namespace Rasterizer {
 	void init();
-	void reset();
-	extern unsigned char *depthBuffer;
 
 	extern fp fov_d;
 	void setFOV(int fov);

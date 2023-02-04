@@ -48,7 +48,7 @@ void Car::render(mat4 viewMatrix){
 	model.modelMatrix = mat4();
 	model.modelMatrix = mat4::translate(model.modelMatrix, position.x, -0.5, position.z);
 	model.modelMatrix = mat4::rotateY(model.modelMatrix, direction);
-	model.draw(true, true, true, true);
+	model.draw(true, true, true);
 }
 
 Model Car::model = Model();

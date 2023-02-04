@@ -28,18 +28,15 @@ vec3<float> cameraSpeed = {0, 0, 0};
 float cameraAngle = 0;
 
 #ifdef GINT
-static GALIGNED(32) unsigned char depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
 #include "textures.h"
 #endif
 
 int main(){
 #ifndef GINT
-	unsigned char depthBuffer[RENDER_WIDTH*RENDER_HEIGHT];
 #include "models.h"
 #include "textures.h"
 #endif
-	Rasterizer::depthBuffer = depthBuffer;
 
 	createSinTable();
 
@@ -116,8 +113,6 @@ int main(){
 #endif
 
 	while(true){
-		Rasterizer::reset();
-
 		Time::update();
 		Input::update();
 
@@ -246,7 +241,7 @@ int main(){
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, 20, -6, -20);
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, cameraPos.x, 0, cameraPos.z);
 		sun.modelMatrix = mat4::rotateY(sun.modelMatrix, cameraAngle + HALF_PI);
-		sun.draw(false, false, true, true);
+		sun.draw(false, true, true);
 
 		track.render(view, car.position);
 

@@ -2,9 +2,9 @@
 
 namespace Rasterizer {
 #ifdef TEXTURED
-	inline void _drawTriangle_textured(Model *model, Triangle triangle, bool useDepth, bool isShaded){
+	inline void _drawTriangle_textured(Model *model, Triangle triangle, bool isShaded){
 #else
-	inline void _drawTriangle(Model *model, Triangle triangle, bool useDepth, bool isShaded){
+	inline void _drawTriangle(Model *model, Triangle triangle, bool isShaded){
 #endif
 		vec3<fp> points_d[3] = {
 			toDevice(triangle.points[0]),
@@ -22,8 +22,6 @@ namespace Rasterizer {
 			triangle.texCoords[1],
 			triangle.texCoords[2],
 		};
-
-		unsigned char z = (points[0].z + points[1].z + points[2].z) / 3;
 
 		fp brightness = 1;
 		if(isShaded){
@@ -118,10 +116,6 @@ namespace Rasterizer {
 			vec2<fp> texCoord_i = texCoord + texCoord_x * minX;
 #endif
 			for(int x = minX; x <= maxX; x++){
-				if(z < depthBuffer[x+y*RENDER_WIDTH] || !useDepth){
-					if(useDepth){
-						depthBuffer[x+y*RENDER_WIDTH] = z;
-					}
 #ifdef TEXTURED
 					unsigned short color = 0;
 					if(texCoord_i.x > 0 && texCoord_i.x < model->texture->width && texCoord_i.y > 0 && texCoord_i.y < model->texture->height){
@@ -143,7 +137,6 @@ namespace Rasterizer {
 					Display::drawPoint(x, y, triangle.c);
 #endif
 #endif
-				}
 
 #ifdef TEXTURED
 				texCoord_i = texCoord_i + texCoord_x;
