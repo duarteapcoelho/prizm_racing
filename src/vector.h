@@ -3,6 +3,57 @@
 #include "rmath.h"
 
 template <typename T>
+struct vec2 {
+	T x;
+	T y;
+	inline vec2(){
+		x = 0;
+		y = 0;
+	}
+	inline vec2(T x, T y){
+		this->x = x;
+		this->y = y;
+	}
+	inline vec2<T> operator + (vec2<T> o){
+		return {x + o.x, y + o.y};
+	}
+	inline vec2<T> operator - (vec2<T> o){
+		return {x - o.x, y - o.y};
+	}
+	inline vec2<T> operator * (vec2<T> o){
+		return {x * o.x, y * o.y};
+	}
+	inline vec2<T> operator / (vec2<T> o){
+		return {x / o.x, y / o.y};
+	}
+	inline vec2<T> operator * (T o){
+		return {x * o, y * o};
+	}
+	inline vec2<T> operator / (T o){
+		return {x / o, y / o};
+	}
+
+	inline bool operator == (vec2<T> o){
+		return x == o.x && y == o.y;
+	}
+
+	inline vec2<T> normalized(){
+		T i_d = isqrt<T>(x*x + y*y);
+		return (*this) * i_d;
+	}
+	inline T i_length(){
+		return isqrt<T>(x*x + y*y);
+	}
+	inline T length2(){
+		return x*x + y*y;
+	}
+	template <typename U>
+	inline operator vec2<U>(){
+		return {x, y};
+	}
+};
+
+template <typename T>
 struct vec3 {
 	T x;
 	T y;
@@ -54,6 +105,10 @@ struct vec3 {
 	inline operator vec3<U>(){
 		return {x, y, z};
 	}
+	template <typename U>
+	inline operator vec2<U>(){
+		return {x, y};
+	}
 };
 
 template <typename T>
@@ -97,6 +152,16 @@ inline vec3<T> smoothDamp(vec3<T> current, vec3<T> target, vec3<T> *currentVeloc
 template <typename T>
 inline T dot(vec3<T> a, vec3<T> b){
 	return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
+template <typename T>
+inline T dot(vec2<T> a, vec2<T> b){
+	return a.x*b.x + a.y*b.y;
+}
+
+template <typename T>
+inline T cross(vec2<T> a, vec2<T> b){
+	return (a.x*b.y) - (a.y*b.x);
 }
 
 template <typename T>
