@@ -1,13 +1,21 @@
 #include "track.h"
 
+Renderer::Model Track::coneModel = Renderer::Model();
+
 Track::Track(int numPoints, vec3<float> *points, float width, float tolerance){
 	this->numPoints = numPoints;
 	this->points = points;
 	this->width = width;
 	this->tolerance = tolerance;
 
-	triangles = (Triangle*)malloc(numPoints*2 * sizeof(Triangle));
-	cones = (Model*)malloc(numPoints*2 * sizeof(Model));
+	material = {
+		.texture = nullptr,
+		.color = {0.2, 0.2, 0.2},
+		.isShaded = false
+	};
+
+	Renderer::Triangle *triangles = (Renderer::Triangle*)malloc(numPoints*2 * sizeof(Renderer::Triangle));
+	cones = (Renderer::Model*)malloc(numPoints*2 * sizeof(Renderer::Model));
 
 	for(int i = 0; i < numPoints; i++){
 		vec3<float> pos = points[i];
@@ -23,29 +31,35 @@ Track::Track(int numPoints, vec3<float> *points, float width, float tolerance){
 		vec3<fp> p2 = pos - nextPerpendicular + direction;
 		vec3<fp> p3 = pos + nextPerpendicular + direction;
 		triangles[i*2] = {
-			{p0, p1, p2},
-			{0, -1, 0},
-			newColor(50, 50, 50),
-			{{0,0},{0,0},{0,0}}
+			.verts = {
+				{p0, {0,0}},
+				{p1, {0,0}},
+				{p2, {0,0}}
+			},
+			.normal = {0, -1, 0},
+			.material = 0
 		};
 		triangles[i*2+1] = {
-			{p1, p2, p3},
-			{0, -1, 0},
-			newColor(50, 50, 50),
-			{{0,0},{0,0},{0,0}}
+			.verts = {
+				{p1, {0,0}},
+				{p2, {0,0}},
+				{p3, {0,0}}
+			},
+			.normal = {0, -1, 0},
+			.material = 0
 		};
 
-		cones[i*2] = Model(coneMesh);
-		cones[i*2+1] = Model(coneMesh);
+		cones[i*2] = coneModel;
+		cones[i*2+1] = coneModel;
 		cones[i*2].modelMatrix = mat4::translate(cones[i*2].modelMatrix, pos - perpendicular);
 		cones[i*2+1].modelMatrix = mat4::translate(cones[i*2+1].modelMatrix, pos + perpendicular);
 	}
-	model = Model({numPoints * 2, triangles});
+	model = Renderer::Model({numPoints * 2, triangles}, &material);
 }
 
 void Track::render(mat4 viewMatrix, vec3<float> carPos){
 	model.viewMatrix = viewMatrix;
-	model.draw(false, true, true);
+	model.draw();
 
 	for(int i = 0; i < numPoints; i+=2){
 		float d = (points[i] - carPos).length2();
@@ -54,8 +68,8 @@ void Track::render(mat4 viewMatrix, vec3<float> carPos){
 		}
 		cones[i*2].viewMatrix = viewMatrix;
 		cones[i*2+1].viewMatrix = viewMatrix;
-		cones[i*2].draw(true, false, true);
-		cones[i*2+1].draw(true, false, true);
+		cones[i*2].draw();
+		cones[i*2+1].draw();
 	}
 }
 
@@ -80,5 +94,3 @@ bool Track::isInside(vec3<float> p){
 	}
 	return minDistance2 < width*width*tolerance*tolerance;
 }
-
-Mesh Track::coneMesh = {0, nullptr};

@@ -82,4 +82,4 @@ class _fp {
 };
 
 typedef _fp<int, 10, 1024> fp;
-typedef _fp<long long int, 10, 1024> lfp;
+typedef _fp<long long int, 10, 1024> lfp; // for higher values

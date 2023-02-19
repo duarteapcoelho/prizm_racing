@@ -1,11 +1,11 @@
 #pragma once
 
 #include "vector.h"
-#include "rasterizer.h"
+#include "renderer.h"
 
 class Car {
 public:
-	static Model model;
+	static Renderer::Model model;
 
 	vec3<float> position = {0, 0, 0};
 	vec3<float> speed = {0, 0, 0};

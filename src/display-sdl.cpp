@@ -22,6 +22,7 @@ Color newColor(unsigned short color){
 }
 
 namespace Display {
+	unsigned short *vram = nullptr;
 	int textHeight = 0;
 
 	void init() {

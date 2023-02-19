@@ -20,6 +20,7 @@ Color newColor(int r, int g, int b);
 Color newColor(unsigned short color);
 
 namespace Display {
+	extern unsigned short *vram;
 	extern int textHeight;
 	void init();
 	void destroy();

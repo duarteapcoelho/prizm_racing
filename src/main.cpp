@@ -1,5 +1,5 @@
 #include "display.h"
-#include "rasterizer.h"
+#include "renderer.h"
 #include "time.h"
 #include "util.h"
 #include "input.h"
@@ -28,20 +28,20 @@ vec3<float> cameraSpeed = {0, 0, 0};
 float cameraAngle = 0;
 
 #ifdef GINT
-#include "models.h"
 #include "textures.h"
+#include "models.h"
 #endif
 
 int main(){
 #ifndef GINT
-#include "models.h"
 #include "textures.h"
+#include "models.h"
 #endif
 
 	createSinTable();
 
-	Car::model = Model({181, car_triangles}, &car_texture);
-	Track::coneMesh = {43, cone_triangles};
+	Car::model = Renderer::Model(car_mesh, car_materials);
+	Track::coneModel = Renderer::Model(cone_mesh, cone_materials);
 
 	Time::init();
 
@@ -53,9 +53,11 @@ int main(){
 
 	Input::init();
 
+	Rasterizer::init();
+
 	srand(0);
 
-	Model sun({8, sun_triangles});
+	Renderer::Model sun(sun_mesh, sun_materials);
 
 	vec3<float> trackPoints[] = {
 		{0, 0, 0},
@@ -92,9 +94,6 @@ int main(){
 		trackPoints[i].y = 0;
 	}
 	Track track = Track(28, trackPoints, 10, 1.0);
-
-	Rasterizer::init();
-	Rasterizer::setFOV(70);
 
 	Car car = Car();
 #ifdef PRIZM
@@ -241,7 +240,7 @@ int main(){
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, 20, -6, -20);
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, cameraPos.x, 0, cameraPos.z);
 		sun.modelMatrix = mat4::rotateY(sun.modelMatrix, cameraAngle + HALF_PI);
-		sun.draw(false, true, true);
+		sun.draw();
 
 		track.render(view, car.position);
 

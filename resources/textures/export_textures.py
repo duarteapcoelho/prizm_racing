@@ -17,6 +17,6 @@ for file in files:
           output_file.write("0x{:04X},".format(color))
         output_file.write("\n")
     output_file.write("};\n")
-    output_file.write("#ifdef GINT\nstatic\n#endif\nTexture {0}_texture = {{{0}_pixels, {1}, {2}}};\n".format(name, width, height))
+    output_file.write("#ifdef GINT\nstatic\n#endif\nRasterizer::Texture {0}_texture = {{{0}_pixels, {1}, {2}}};\n".format(name, width, height))
 
 output_file.close()

@@ -262,4 +262,4 @@ unsigned short car_pixels[] = {
 #ifdef GINT
 static
 #endif
-Texture car_texture = {car_pixels, 256, 256};
+Rasterizer::Texture car_texture = {car_pixels, 256, 256};

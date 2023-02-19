@@ -20,17 +20,17 @@ Color newColor(unsigned short color){
 }
 
 namespace Display {
+	unsigned short *vram = nullptr;
 	int textHeight = 10;
-	unsigned short *VRAMAddress;
 
 	void init(){
-		VRAMAddress = (unsigned short*)GetVRAMAddress();
+		vram = (unsigned short*)GetVRAMAddress();
 	}
 
 	void clear(Color color){
 		long v = color.color | (color.color << (8*sizeof(unsigned short)));
 		for(int i = 0; i < DISPLAY_WIDTH*DISPLAY_HEIGHT/2; i++){
-			((long*)VRAMAddress)[i] = v;
+			((long*)vram)[i] = v;
 		}
 	}
 	void destroy(){}
