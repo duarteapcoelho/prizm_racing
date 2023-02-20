@@ -29,7 +29,7 @@ namespace Renderer {
 	};
 
 	class Model {
-		void drawTriangle(Triangle triangle);
+		void drawTriangle(Triangle triangle, bool addToOrdTbl);
 	public:
 		Material *materials;
 		Mesh mesh;
@@ -37,6 +37,6 @@ namespace Renderer {
 		Model();
 		Model(Mesh mesh, Material *materials);
 
-		void draw();
+		void draw(bool addToOrdTbl);
 	};
 };

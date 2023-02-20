@@ -10,14 +10,13 @@ vec3<int> toScreenCoords(vec3<fp> p){
 	};
 }
 
-#define NEAR_PLANE 1
-#define FAR_PLANE 1000
-
 #include "drawTriangle.h"
 #define TEXTURED
 #include "drawTriangle.h"
 
 namespace Rasterizer {
+	OrdTblNode **ordTbl;
+
 	struct Plane {
 		vec3<fp> n;
 		fp d;
@@ -53,7 +52,12 @@ namespace Rasterizer {
 		clippingPlanes[5] = {{0, fp(0)-d, c}, 0}; // top
 	}
 
-	void init(){
+	void init(OrdTblNode **ot){
+		ordTbl = ot;
+		for(int i = 0; i < 255; i++){
+			ordTbl[i] = nullptr;
+		}
+
 		initClippingPlanes();
 	}
 
@@ -224,6 +228,46 @@ namespace Rasterizer {
 			} else {
 				_drawTriangle_textured(m.triangles[i]);
 			}
+		}
+		free(m.triangles);
+	}
+
+	void addTriangle(Triangle t, unsigned char z){
+		Mesh m = clipTriangle(t);
+		for(int i = 0; i < m.numTriangles; i++){
+			OrdTblNode *n = (OrdTblNode*) malloc(sizeof(OrdTblNode));
+			n->next = ordTbl[z];
+			n->t = (Triangle*) malloc(sizeof(Triangle));
+			*n->t = m.triangles[i];
+			ordTbl[z] = n;
+		}
+		free(m.triangles);
+	}
+
+	void drawOrdTbl(){
+		for(int i = 254; i >= 0; i--){
+			OrdTblNode *n = ordTbl[i];
+			while(n != nullptr){
+				if(n->t->texture == nullptr){
+					_drawTriangle(*n->t);
+				} else {
+					_drawTriangle_textured(*n->t);
+				}
+				n = n->next;
+			}
+		}
+	}
+
+	void clearOrdTbl(){
+		for(int i = 0; i < 255; i++){
+			OrdTblNode *n = ordTbl[i];
+			while(n != nullptr){
+				free(n->t);
+				OrdTblNode *next = n->next;
+				free(n);
+				n = next;
+			}
+			ordTbl[i] = nullptr;
 		}
 	}
 }

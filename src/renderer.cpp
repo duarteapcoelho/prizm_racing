@@ -11,13 +11,13 @@ namespace Renderer {
 		this->materials = materials;
 	}
 
-	void Model::draw(){
+	void Model::draw(bool addToOrdTbl){
 		for(int i = 0; i < mesh.numTriangles; i++){
-			drawTriangle(mesh.triangles[i]);
+			drawTriangle(mesh.triangles[i], addToOrdTbl);
 		}
 	}
 
-	void Model::drawTriangle(Triangle triangle){
+	void Model::drawTriangle(Triangle triangle, bool addToOrdTbl){
 		vec3<fp> color = materials[triangle.material].color;
 		fp brightness = 1;
 		if(materials[triangle.material].isShaded){
@@ -45,6 +45,13 @@ namespace Renderer {
 		}
 		t.color = color;
 		t.texture = materials[triangle.material].texture;
-		Rasterizer::drawTriangle(t);
+
+		fp avgZ = (t.verts[0].pos.z + t.verts[1].pos.z + t.verts[2].pos.z) / fp(3);
+		unsigned char depth = int(avgZ*fp(5));
+		if(addToOrdTbl){
+			Rasterizer::addTriangle(t, depth);
+		} else {
+			Rasterizer::drawTriangle(t);
+		}
 	}
 };

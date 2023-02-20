@@ -1,4 +1,5 @@
 #include "display.h"
+#include "rasterizer.h"
 #include "renderer.h"
 #include "time.h"
 #include "util.h"
@@ -53,7 +54,8 @@ int main(){
 
 	Input::init();
 
-	Rasterizer::init();
+	Rasterizer::OrdTblNode *ot[255];
+	Rasterizer::init(ot);
 
 	srand(0);
 
@@ -240,7 +242,7 @@ int main(){
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, 20, -6, -20);
 		sun.modelMatrix = mat4::translate(sun.modelMatrix, cameraPos.x, 0, cameraPos.z);
 		sun.modelMatrix = mat4::rotateY(sun.modelMatrix, cameraAngle + HALF_PI);
-		sun.draw();
+		sun.draw(false);
 
 		track.render(view, car.position);
 
@@ -248,6 +250,9 @@ int main(){
 		enemyCar.render(view);
 #endif
 		car.render(view);
+
+		Rasterizer::drawOrdTbl();
+		Rasterizer::clearOrdTbl();
 
 		char buffer[20];
 #ifdef PRIZM

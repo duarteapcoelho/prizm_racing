@@ -7,6 +7,9 @@
 #define RENDER_WIDTH DISPLAY_WIDTH
 #define RENDER_HEIGHT DISPLAY_HEIGHT
 
+#define NEAR_PLANE 1
+#define FAR_PLANE 1000
+
 namespace Rasterizer {
 	struct Texture {
 		unsigned short *pixels;
@@ -25,9 +28,20 @@ namespace Rasterizer {
 		vec3<fp> color;
 	};
 
-	void init();
+	struct OrdTblNode {
+		Triangle *t;
+		OrdTblNode *next;
+	};
+
+	extern OrdTblNode **ordTbl;
+
+	void init(OrdTblNode **ot);
 	void setFOV(int fov);
 	extern fp fov_d;
 
 	void drawTriangle(Triangle triangle);
+	void addTriangle(Triangle triangle, unsigned char depth);
+
+	void drawOrdTbl();
+	void clearOrdTbl();
 };
