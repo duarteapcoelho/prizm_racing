@@ -3,7 +3,7 @@ A 3D, multiplayer racing game for casio fx-CG 10/20/50 calculators
 
 ## Pictures
 ![Video](resources/video.gif)  
-Now with textures since version 1.4:
+Now with textures since version 1.4:  
 ![Newer graphics](resources/picture1.png)
 
 ## Features
